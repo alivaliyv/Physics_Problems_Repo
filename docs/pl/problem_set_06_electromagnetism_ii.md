@@ -8,10 +8,10 @@
 Dla następujących danych:
 
 * $\vec B = (0,0,1)\ \mathrm{T}$
-
 * $\vec v = (2,3,0)\ \mathrm{m/s}$
-
 * $q = 1\ \mathrm{mC}$
+
+Odpowiedz na następujące pytania:
 
 1. Wyznacz siłę Lorentza $\vec F$ działającą na ładunek.
 2. Rozwiąż równanie ruchu dla tego ładunku, zakładając, że w chwili $t=0$ znajduje się w punkcie $(0,0,0)$.
@@ -95,6 +95,7 @@ Dla przykładowych danych:
 * $\alpha=25^\circ$
 * $g=9.81\ \mathrm{m/s^2}$
 
+Odpowiedz na następujące pytania:
 
 1. Wyznacz SEM ruchową $\mathcal{E}(v)$ i prąd $I(v)$.
 2. Pokaż, że na pręt działa siła magnetyczna hamująca wzdłuż szyn:
@@ -120,6 +121,8 @@ Dla przykładowych danych:
 * $R=0.40\ \Omega$
 * $v=1.5\ \mathrm{m/s}$
 
+Odpowiedz na następujące pytania:
+
 1. Rozpisz strumień $\Phi(t)$ w fazie wjeżdżania (gdy część pętli jest już w polu, ale jeszcze nie cała).
 2. Wyznacz $\mathcal{E}$ i $I$ w tej fazie.
 3. Wyznacz siłę hamującą $F(v)$.
@@ -132,20 +135,20 @@ Dla przykładowych danych:
 
 Obwód RL: cewka o indukcyjności $L$ i oporze $R$ jest zasilana napięciem stałym $U$. Po długim czasie obwód jest w stanie ustalonym, potem w chwili $t=0$ zasilanie zostaje odłączone i pozostaje obwód $L$–$R$ bez źródła.
 
-Dane:
+Dla danych:
 
 * $L=0.20\ \mathrm{H}$
 * $R=5.0\ \Omega$
 * $U=12\ \mathrm{V}$
 
+Odpowiedz na następujące pytania:
+
 1. Wyznacz prąd ustalony $I_0$ przed odłączeniem zasilania.
 2. Po odłączeniu: wyprowadź $I(t)$, stałą czasową $\tau$ i napięcie na cewce $U_L(t)$.
 3. Oblicz energię zgromadzoną w polu magnetycznym cewki tuż przed odłączeniem:
-
 $$
 W=\frac12 LI_0^2
 $$
-
 4. Pokaż, że ta energia zamienia się w ciepło Joule’a w oporze (całka z $I^2R$ po czasie).
 5. (Krótko jakościowo) Dlaczego pojawia się przepięcie przy rozłączaniu prądu?
 

@@ -12,6 +12,8 @@ For the following data:
 * $\vec v = (2,3,0)\ \mathrm{m/s}$
 * $q = 1\ \mathrm{mC}$
 
+Answer the following questions:
+
 1. Determine the Lorentz force $\vec F$ acting on the charge.
 2. Solve the equation of motion for this charge, assuming that at time $t=0$ it is at the point $(0,0,0)$.
 3. Calculate the magnitude $|\vec F|$.
@@ -89,6 +91,8 @@ For example data:
 * $\alpha=25^\circ$
 * $g=9.81\ \mathrm{m/s^2}$
 
+Answer the following questions:
+
 1. Determine the motional EMF $\mathcal{E}(v)$ and the current $I(v)$.
 2. Show that a magnetic braking force acts on the rod along the rails:
 3. Write the equation of motion along the incline and reduce it to a form with "damping proportional to $v$".
@@ -115,6 +119,8 @@ For example data:
 * $R=0.40\ \Omega$
 * $v=1.5\ \mathrm{m/s}$
 
+Answer the following questions:
+
 1. Write down the flux $\Phi(t)$ in the entering phase (when part of the loop is already in the field, but not yet all of it).
 2. Determine $\mathcal{E}$ and $I$ in this phase.
 3. Determine the braking force $F(v)$.
@@ -127,20 +133,20 @@ For example data:
 
 RL circuit: a coil with inductance $L$ and resistance $R$ is powered by a DC voltage $U$. After a long time, the circuit is in a steady state, then at time $t=0$ the power supply is disconnected, and the $L$–$R$ circuit remains without a source.
 
-Data:
+For the data:
 
 * $L=0.20\ \mathrm{H}$
 * $R=5.0\ \Omega$
 * $U=12\ \mathrm{V}$
 
+Answer the following questions:
+
 1. Determine the steady current $I_0$ before disconnecting the power supply.
 2. After disconnection: derive $I(t)$, the time constant $\tau$, and the voltage across the coil $U_L(t)$.
 3. Calculate the energy stored in the magnetic field of the coil right before disconnection:
-
 $$
 W=\frac12 LI_0^2
 $$
-
 4. Show that this energy is converted into Joule heat in the resistor (integral of $I^2R$ over time).
 5. (Briefly qualitatively) Why does an overvoltage appear when disconnecting the current?
 
