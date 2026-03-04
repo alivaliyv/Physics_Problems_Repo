@@ -124,32 +124,28 @@ x = a\cos t, \qquad y = b\sin t
 $$
 
 1. Wyznacz wektor prędkości $\vec v(t)$ oraz przyspieszenia $\vec a(t)$.
-
 2. Wyznacz jednostkowy wektor styczny do toru
    $$
    \hat T(t)=\frac{\vec v(t)}{|\vec v(t)|}.
    $$
-
 3. Rozłóż przyspieszenie na składową styczną i normalną:
    $$
    \vec a(t)=\vec a_t(t)+\vec a_n(t),
    $$
    oraz wyznacz wartość przyspieszenia normalnego $a_n(t)=|\vec a_n(t)|$.
-
 4. Korzystając z relacji
    $$
    a_n=\frac{v^2}{R},
    $$
    wyznacz promień krzywizny toru w punkcie $t=0$.
-
 5. Porównaj wynik z przypadkiem okręgu $a=b$.
 
-6. **Interpretacja fizyczna.**
-   Odpowiedz na pytania:
+### **Interpretacja fizyczna.**
+Odpowiedz na pytania:
 
-   * Czy większa krzywizna toru oznacza większe przyspieszenie normalne?
-   * W którym miejscu elipsy tor jest bardziej „zakrzywiony”: przy końcu półosi większej czy mniejszej?
-   * Wyjaśnij, dlaczego przyspieszenie normalne można interpretować jako przyczynę zmiany kierunku ruchu.
+* Czy większa krzywizna toru oznacza większe przyspieszenie normalne?
+* W którym miejscu elipsy tor jest bardziej „zakrzywiony”: przy końcu półosi większej czy mniejszej?
+* Wyjaśnij, dlaczego przyspieszenie normalne można interpretować jako przyczynę zmiany kierunku ruchu.
 
 ---
 
@@ -165,19 +161,15 @@ $$
 $$
 \vec v(t)=\frac{d\vec r}{dt}
 $$
-
 2. Wyznacz wartość prędkości $|\vec v(t)|$.
-
 3. Zapisz długość łuku toru jako całkę:
 $$
 s = \int_0^1 |\vec v(t)|\,dt
 $$
-
 4. Oblicz tę całkę analitycznie (jeśli możliwe) lub sprowadź ją do postaci wymagającej metody numerycznej.
-
 5. Zaimplementuj metodę trapezów w HTML/JS do obliczenia $s$:
-   - sprawdź zbieżność wyniku przy rosnącej liczbie podziałów $N$,
-   - wykonaj wykres błędu w funkcji $N$.
+    - sprawdź zbieżność wyniku przy rosnącej liczbie podziałów $N$,
+    - wykonaj wykres błędu w funkcji $N$.
 
 Wymaganie: wizualizacja toru oraz możliwość zmiany $N$ w aplikacji.
 
@@ -242,16 +234,12 @@ $$
 $$
 \vec v(t)=\dot{\vec r}(t)
 $$
-
 2. Oblicz moment pędu względem początku układu:
 $$
 \vec L(t)=m\,\vec r(t)\times \vec v(t)
 $$
-
 3. Pokaż, że $|\vec L|=mR^2\omega$ jest stałe, a wektor $\vec L$ jest prostopadły do płaszczyzny ruchu.
-
 4. Zinterpretuj zwrot $\vec L$ (reguła prawej dłoni).
-
 5. (Opcjonalnie) Dodaj stałą siłę dośrodkową i policz moment siły:
 $$
 \vec \tau = \vec r \times \vec F

@@ -46,17 +46,14 @@ $$
 $$
 
 * Determine the velocity
-
   $$
   \vec v(t) = \frac{d\vec r}{dt}
   $$
 
 * Determine the acceleration
-
   $$
   \vec a(t) = \frac{d^2 \vec r}{dt^2}
   $$
-
 * Calculate $|\vec v(1)|$.
 * Calculate $\vec v \cdot \vec a$.
 * Calculate $\vec v \times \vec a$.
@@ -73,11 +70,9 @@ $$
 $$
 
 1. Determine
-
-   $$
-   \vec r(t) = \vec r(0) + \int_0^t \vec v(\tau)\, d\tau
-   $$
-
+$$
+\vec r(t) = \vec r(0) + \int_0^t \vec v(\tau)\, d\tau
+$$
 2. Determine the acceleration $\vec a(t)$.
 
 ### B) For a given acceleration:
@@ -89,15 +84,12 @@ $$
 \qquad
 \vec r(0) = (0,0,0)
 $$
-
 1. Determine
 
    $$
    \vec v(t) = \vec v(0) + \int_0^t \vec a(\tau)\, d\tau
    $$
-
 2. Determine
-
    $$
    \vec r(t) = \int_0^t \vec v(\tau)\, d\tau+ \vec r(0)
    $$
@@ -135,34 +127,27 @@ $$
 
 1. Determine the velocity vector $\vec v(t)$ and the acceleration vector $\vec a(t)$.
 2. Determine the unit tangent vector to the trajectory
-
    $$
    \hat T(t)=\frac{\vec v(t)}{|\vec v(t)|}.
    $$
-
 3. Decompose the acceleration into tangential and normal components:
-
    $$
    \vec a(t)=\vec a_t(t)+\vec a_n(t),
    $$
-
    and determine the magnitude of the normal acceleration $a_n(t)=|\vec a_n(t)|$.
-
 4. Using the relation
-
    $$
    a_n=\frac{v^2}{R},
    $$
-
    determine the radius of curvature of the trajectory at point $t=0$.
-
 5. Compare the result with the case of a circle $a=b$.
-6. **Physical interpretation.**
-   Answer the following questions:
 
-   * Does a greater trajectory curvature imply a greater normal acceleration?
-   * Where on the ellipse is the trajectory more "curved": at the end of the major or minor semi-axis?
-   * Explain why normal acceleration can be interpreted as the cause of the change in the direction of motion.
+### **Physical interpretation.**
+Answer the following questions:
+
+* Does a greater trajectory curvature imply a greater normal acceleration?
+* Where on the ellipse is the trajectory more "curved": at the end of the major or minor semi-axis?
+* Explain why normal acceleration can be interpreted as the cause of the change in the direction of motion.
 
 ---
 
@@ -175,22 +160,18 @@ x(t) = t,\qquad y(t)=t^2,\qquad t\in[0,1]
 $$
 
 1. Determine the velocity vector:
-
    $$
    \vec v(t)=\frac{d\vec r}{dt}
    $$
-
 2. Determine the magnitude of the velocity $|\vec v(t)|$.
 3. Write the arc length of the trajectory as an integral:
-
    $$
    s = \int_0^1 |\vec v(t)|\,dt
    $$
-
 4. Calculate this integral analytically (if possible) or reduce it to a form that requires a numerical method.
 5. Implement the trapezoidal rule in HTML/JS to calculate $s$:
-   - check the convergence of the result with an increasing number of divisions $N$,
-   - plot the error as a function of $N$.
+    - check the convergence of the result with an increasing number of divisions $N$,
+    - plot the error as a function of $N$.
 
 Requirement: visualization of the trajectory and the ability to change $N$ in the application.
 
@@ -212,11 +193,9 @@ $$
 
 1. Determine the velocity vector $\vec v(t)$.
 2. Calculate the work done by the force $\vec F$ along the trajectory, i.e., the line integral:
-
    $$
    W = \int_C \vec F \cdot d\vec r
    $$
-
 3. Write the integral as the limit of a Riemann sum and calculate its value numerically in HTML/JS, comparing it with the analytical result (if possible).
 
 ---
@@ -257,17 +236,14 @@ $$
    $$
    \vec v(t)=\dot{\vec r}(t)
    $$
-
 2. Calculate the angular momentum with respect to the origin:
 
    $$
    \vec L(t)=m\,\vec r(t)\times \vec v(t)
    $$
-
 3. Show that $|\vec L|=mR^2\omega$ is constant, and the vector $\vec L$ is perpendicular to the plane of motion.
 4. Interpret the direction of $\vec L$ (right-hand rule).
 5. (Optional) Add a constant centripetal force and calculate the torque:
-
    $$
    \vec \tau = \vec r \times \vec F
    $$
