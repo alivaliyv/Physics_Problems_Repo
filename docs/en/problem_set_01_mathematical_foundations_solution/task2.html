@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Trajectory, Velocity, Acceleration</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <h2>Trajectory in the plane z = 5</h2>
+  <canvas id="trajChart" width="700" height="450"></canvas>
+
+  <script>
+    const tMin = -2;
+    const tMax = 2;
+    const steps = 200;
+    const points = [];
+    const sampleTs = [-1.5, -0.5, 0.5, 1.5];
+
+    function r(t) {
+      return { x: t*t, y: Math.sin(t) };
+    }
+
+    function v(t) {
+      return { x: 2*t, y: Math.cos(t) };
+    }
+
+    function a(t) {
+      return { x: 2, y: -Math.sin(t) };
+    }
+
+    for (let i = 0; i <= steps; i++) {
+      const t = tMin + (tMax - tMin) * i / steps;
+      points.push(r(t));
+    }
+
+    const datasets = [
+      {
+        label: "Trajectory",
+        data: points,
+        parsing: false,
+        showLine: true,
+        pointRadius: 0
+      }
+    ];
+
+    const scaleVel = 0.25;
+    const scaleAcc = 0.25;
+
+    sampleTs.forEach((t, idx) => {
+      const p = r(t);
+      const vv = v(t);
+      const aa = a(t);
+
+      datasets.push({
+        label: `v(t=${t})`,
+        data: [
+          { x: p.x, y: p.y },
+          { x: p.x + scaleVel * vv.x, y: p.y + scaleVel * vv.y }
+        ],
+        parsing: false,
+        showLine: true,
+        pointRadius: [4, 0]
+      });
+
+      datasets.push({
+        label: `a(t=${t})`,
+        data: [
+          { x: p.x, y: p.y },
+          { x: p.x + scaleAcc * aa.x, y: p.y + scaleAcc * aa.y }
+        ],
+        parsing: false,
+        showLine: true,
+        pointRadius: [4, 0]
+      });
+    });
+
+    new Chart(document.getElementById("trajChart"), {
+      type: "scatter",
+      data: { datasets },
+      options: {
+        responsive: false,
+        scales: {
+          x: { type: "linear", title: { display: true, text: "x(t) = t^2" } },
+          y: { title: { display: true, text: "y(t) = sin t" } }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
