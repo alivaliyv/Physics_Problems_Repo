@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<!--
+
+Visualize it at livecodes.io
+
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Exponential Decay and Growth</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <h2>Solution of dy/dt = -k y</h2>
+
+  <label for="k">k:</label>
+  <input id="k" type="range" min="-3" max="3" step="0.1" value="1" />
+  <span id="kVal">1</span>
+
+  <label for="y0">y(0):</label>
+  <input id="y0" type="range" min="-5" max="5" step="0.1" value="2" />
+  <span id="y0Val">2</span>
+
+  <canvas id="chart" width="700" height="400"></canvas>
+
+  <script>
+    function solution(t, k, y0) {
+      return y0 * Math.exp(-k * t);
+    }
+
+    const chart = new Chart(document.getElementById("chart"), {
+      type: "scatter",
+      data: {
+        datasets: [{
+          label: "y(t)",
+          data: [],
+          parsing: false,
+          showLine: true,
+          pointRadius: 0
+        }]
+      },
+      options: {
+        responsive: false,
+        scales: {
+          x: { type: "linear", title: { display: true, text: "t" } },
+          y: { title: { display: true, text: "y(t)" } }
+        }
+      }
+    });
+
+    function update() {
+      const k = Number(document.getElementById("k").value);
+      const y0 = Number(document.getElementById("y0").value);
+      document.getElementById("kVal").textContent = k;
+      document.getElementById("y0Val").textContent = y0;
+
+      const data = [];
+      for (let i = 0; i <= 300; i++) {
+        const t = 5 * i / 300;
+        data.push({ x: t, y: solution(t, k, y0) });
+      }
+
+      chart.data.datasets[0].data = data;
+      chart.update();
+    }
+
+    document.getElementById("k").addEventListener("input", update);
+    document.getElementById("y0").addEventListener("input", update);
+    update();
+  </script>
+</body>
+</html>

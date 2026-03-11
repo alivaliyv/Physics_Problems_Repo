@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<!--
+
+Visualize it at livecodes.io
+
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Arc Length of y = x^2 on [0,1]</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <h2>Arc length of the curve x=t, y=t^2</h2>
+
+  <label for="N">Number of trapezoids N:</label>
+  <input type="range" id="N" min="2" max="200" value="20" />
+  <span id="Nval">20</span>
+
+  <p id="results"></p>
+
+  <canvas id="curveChart" width="700" height="350"></canvas>
+  <canvas id="errorChart" width="700" height="350"></canvas>
+
+  <script>
+    const exact = Math.sqrt(5)/2 + 0.25*Math.log(2 + Math.sqrt(5));
+
+    function f(t) {
+      return Math.sqrt(1 + 4*t*t);
+    }
+
+    function trapezoidal(N) {
+      const h = 1 / N;
+      let sum = 0.5 * f(0) + 0.5 * f(1);
+      for (let k = 1; k < N; k++) {
+        sum += f(k * h);
+      }
+      return h * sum;
+    }
+
+    function curvePoints() {
+      const pts = [];
+      for (let i = 0; i <= 200; i++) {
+        const t = i / 200;
+        pts.push({ x: t, y: t*t });
+      }
+      return pts;
+    }
+
+    function sampleCurvePoints(N) {
+      const pts = [];
+      for (let k = 0; k <= N; k++) {
+        const t = k / N;
+        pts.push({ x: t, y: t*t });
+      }
+      return pts;
+    }
+
+    const curveChart = new Chart(document.getElementById("curveChart"), {
+      type: "scatter",
+      data: {
+        datasets: [
+          {
+            label: "Curve",
+            data: curvePoints(),
+            parsing: false,
+            showLine: true,
+            pointRadius: 0
+          },
+          {
+            label: "Trapezoid nodes",
+            data: sampleCurvePoints(20),
+            parsing: false,
+            showLine: true,
+            pointRadius: 3
+          }
+        ]
+      },
+      options: {
+        responsive: false,
+        scales: {
+          x: { type: "linear", title: { display: true, text: "x" } },
+          y: { title: { display: true, text: "y" } }
+        }
+      }
+    });
+
+    const errorData = [];
+    for (let N = 2; N <= 200; N++) {
+      const approx = trapezoidal(N);
+      errorData.push({ x: N, y: Math.abs(approx - exact) });
+    }
+
+    new Chart(document.getElementById("errorChart"), {
+      type: "scatter",
+      data: {
+        datasets: [
+          {
+            label: "Error |s_N - s|",
+            data: errorData,
+            parsing: false,
+            showLine: true,
+            pointRadius: 0
+          }
+        ]
+      },
+      options: {
+        responsive: false,
+        scales: {
+          x: { type: "linear", title: { display: true, text: "N" } },
+          y: { title: { display: true, text: "Absolute error" } }
+        }
+      }
+    });
+
+    function update() {
+      const N = Number(document.getElementById("N").value);
+      document.getElementById("Nval").textContent = N;
+      const approx = trapezoidal(N);
+      const error = Math.abs(approx - exact);
+
+      document.getElementById("results").innerHTML =
+        `Exact length: ${exact.toFixed(8)}<br>` +
+        `Trapezoidal approximation: ${approx.toFixed(8)}<br>` +
+        `Absolute error: ${error.toExponential(6)}`;
+
+      curveChart.data.datasets[1].data = sampleCurvePoints(N);
+      curveChart.update();
+    }
+
+    document.getElementById("N").addEventListener("input", update);
+    update();
+  </script>
+</body>
+</html>

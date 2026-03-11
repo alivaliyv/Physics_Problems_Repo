@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<!--
+
+Visualize it at livecodes.io
+
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Work Along a Curve</title>
+</head>
+<body>
+  <h2>Work of the force F(x,y) = (y, 2x)</h2>
+
+  <label for="N">Number of intervals N:</label>
+  <input id="N" type="range" min="2" max="500" value="20" />
+  <span id="Nval">20</span>
+
+  <p id="output"></p>
+
+  <script>
+    const exact = 5 / 3;
+
+    function r(t) {
+      return { x: t, y: t*t };
+    }
+
+    function v(t) {
+      return { x: 1, y: 2*t };
+    }
+
+    function F(x, y) {
+      return { x: y, y: 2*x };
+    }
+
+    function riemannWork(N) {
+      const dt = 1 / N;
+      let sum = 0;
+      for (let k = 0; k < N; k++) {
+        const t = k / N;
+        const pos = r(t);
+        const vel = v(t);
+        const force = F(pos.x, pos.y);
+        sum += (force.x * vel.x + force.y * vel.y) * dt;
+      }
+      return sum;
+    }
+
+    function update() {
+      const N = Number(document.getElementById("N").value);
+      document.getElementById("Nval").textContent = N;
+      const approx = riemannWork(N);
+      const error = Math.abs(approx - exact);
+
+      document.getElementById("output").innerHTML =
+        `Analytical result: ${exact.toFixed(8)}<br>` +
+        `Riemann-sum approximation: ${approx.toFixed(8)}<br>` +
+        `Absolute error: ${error.toExponential(6)}`;
+    }
+
+    document.getElementById("N").addEventListener("input", update);
+    update();
+  </script>
+</body>
+</html>

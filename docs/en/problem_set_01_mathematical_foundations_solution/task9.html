@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<!--
+
+Visualize it at livecodes.io
+
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Harmonic Oscillator</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <h2>Harmonic oscillator</h2>
+
+  <label for="omega">omega:</label>
+  <input id="omega" type="range" min="0.5" max="5" step="0.1" value="2" />
+  <span id="omegaVal">2</span>
+
+  <label for="x0">x(0):</label>
+  <input id="x0" type="range" min="-5" max="5" step="0.1" value="1" />
+  <span id="x0Val">1</span>
+
+  <label for="v0">x'(0):</label>
+  <input id="v0" type="range" min="-5" max="5" step="0.1" value="0" />
+  <span id="v0Val">0</span>
+
+  <canvas id="xChart" width="700" height="300"></canvas>
+  <canvas id="vChart" width="700" height="300"></canvas>
+  <canvas id="aChart" width="700" height="300"></canvas>
+
+  <script>
+    function x(t, omega, x0, v0) {
+      return x0 * Math.cos(omega * t) + (v0 / omega) * Math.sin(omega * t);
+    }
+
+    function v(t, omega, x0, v0) {
+      return -x0 * omega * Math.sin(omega * t) + v0 * Math.cos(omega * t);
+    }
+
+    function a(t, omega, x0, v0) {
+      return -omega * omega * x(t, omega, x0, v0);
+    }
+
+    function makeChart(canvasId, label, yLabel) {
+      return new Chart(document.getElementById(canvasId), {
+        type: "scatter",
+        data: {
+          datasets: [{
+            label,
+            data: [],
+            parsing: false,
+            showLine: true,
+            pointRadius: 0
+          }]
+        },
+        options: {
+          responsive: false,
+          scales: {
+            x: { type: "linear", title: { display: true, text: "t" } },
+            y: { title: { display: true, text: yLabel } }
+          }
+        }
+      });
+    }
+
+    const xChart = makeChart("xChart", "x(t)", "x");
+    const vChart = makeChart("vChart", "x'(t)", "x'");
+    const aChart = makeChart("aChart", "x''(t)", "x''");
+
+    function buildData(fn, omega, x0, v0) {
+      const data = [];
+      for (let i = 0; i <= 500; i++) {
+        const t = 10 * i / 500;
+        data.push({ x: t, y: fn(t, omega, x0, v0) });
+      }
+      return data;
+    }
+
+    function update() {
+      const omega = Number(document.getElementById("omega").value);
+      const x0 = Number(document.getElementById("x0").value);
+      const v0 = Number(document.getElementById("v0").value);
+
+      document.getElementById("omegaVal").textContent = omega;
+      document.getElementById("x0Val").textContent = x0;
+      document.getElementById("v0Val").textContent = v0;
+
+      xChart.data.datasets[0].data = buildData(x, omega, x0, v0);
+      vChart.data.datasets[0].data = buildData(v, omega, x0, v0);
+      aChart.data.datasets[0].data = buildData(a, omega, x0, v0);
+
+      xChart.update();
+      vChart.update();
+      aChart.update();
+    }
+
+    document.getElementById("omega").addEventListener("input", update);
+    document.getElementById("x0").addEventListener("input", update);
+    document.getElementById("v0").addEventListener("input", update);
+    update();
+  </script>
+</body>
+</html>
