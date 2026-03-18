@@ -1,20 +1,5 @@
 # Problem Set 02 - Solutions
 
-## Overview
-
-This notebook contains worked solutions for Problem Set 02 on kinematics. The structure follows a single-file notebook format. For problems where motion is best understood dynamically, standalone HTML visualizations are provided.
-
-## HTML Visualizations
-
-- [Projectile motion animation](./projectile_motion_animation.html)
-- [Circular motion visualization](./circular_motion_visualization.html)
-- [Cycloid animation](./cycloid_animation.html)
-- [2D accelerated motion animation](./accelerated_2d_motion.html)
-- [Relative motion animation](./relative_motion_frames.html)
-- [Heliocentric to geocentric animation](./mars_earth_reference_frames.html)
-
----
-
 # Task 01 - Uniform and Uniformly Accelerated Motion
 
 ## Problem Statement
@@ -1023,19 +1008,3 @@ For the sampled quadratic data, central finite differences recover the exact int
 ## Interpretation
 
 Finite differences are especially accurate for low-degree polynomials. This example shows that the numerical method can reproduce the exact derivative in the interior when the function is sufficiently simple and the stencil matches the polynomial structure.
-
----
-
-## Summary
-
-This problem set illustrates the main kinematic models of one- and two-dimensional motion:
-
-- constant acceleration,
-- projectile motion,
-- parametric trajectories,
-- circular and elliptical motion,
-- rolling motion and cycloids,
-- relative motion and frame changes,
-- numerical differentiation of measured data.
-
-The accompanying HTML files are intended for conceptual review and quick visualization of the geometry and time evolution of the motion.
