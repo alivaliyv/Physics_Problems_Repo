@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Projectile Motion Animation</title>
+<style>
+  body{font-family:Arial,sans-serif;margin:0;background:#f6f7fb;color:#222}
+  .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
+  h1{margin:0 0 8px}
+  .controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:16px 0;padding:14px;background:#fff;border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+  label{font-size:14px;display:block}
+  input[type=range]{width:100%}
+  .canvas-box{background:#fff;border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.08);padding:12px}
+  canvas{width:100%;height:auto;display:block;background:linear-gradient(#eef7ff,#ffffff 65%)}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  button{padding:8px 12px;border:none;border-radius:10px;background:#1f6feb;color:#fff;cursor:pointer}
+  .stat{font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Projectile Motion</h1>
+  <p>Interactive trajectory animation for motion without air resistance.</p>
+  <div class="controls">
+    <label>Initial speed v<sub>0</sub> = <span id="v0Val"></span> m/s
+      <input id="v0" type="range" min="5" max="50" step="1" value="22">
+    </label>
+    <label>Launch angle α = <span id="angVal"></span>°
+      <input id="ang" type="range" min="5" max="85" step="1" value="45">
+    </label>
+    <label>Gravity g = <span id="gVal"></span> m/s²
+      <input id="g" type="range" min="1" max="20" step="0.1" value="9.81">
+    </label>
+    <div class="row">
+      <button id="play">Pause</button>
+      <button id="reset">Reset</button>
+      <button id="multi">Show angle family</button>
+    </div>
+    <div class="stat" id="stats"></div>
+  </div>
+  <div class="canvas-box"><canvas id="c" width="1000" height="560"></canvas></div>
+</div>
+<script>
+const c = document.getElementById('c'), ctx = c.getContext('2d');
+const controls = {v0: v0, ang: ang, g: g};
+const labels = {v0Val, angVal, gVal};
+let running = true, t = 0, prev = 0, trace = [], showFamily = false;
+function params(){
+  const V0 = +controls.v0.value, A = +controls.ang.value*Math.PI/180, G = +controls.g.value;
+  const T = 2*V0*Math.sin(A)/G;
+  const H = (V0*V0*Math.sin(A)**2)/(2*G);
+  const R = (V0*V0*Math.sin(2*A))/G;
+  return {V0,A,G,T,H,R};
+}
+function updateLabels(){
+  labels.v0Val.textContent = (+controls.v0.value).toFixed(0);
+  labels.angVal.textContent = (+controls.ang.value).toFixed(0);
+  labels.gVal.textContent = (+controls.g.value).toFixed(2);
+  const p = params();
+  stats.innerHTML = `Time of flight: <b>${p.T.toFixed(2)}</b> s &nbsp; | &nbsp; Max height: <b>${p.H.toFixed(2)}</b> m &nbsp; | &nbsp; Range: <b>${p.R.toFixed(2)}</b> m`;
+}
+function reset(){ t=0; trace=[]; }
+for(const el of Object.values(controls)) el.addEventListener('input', ()=>{updateLabels(); reset();});
+play.onclick = ()=>{running=!running; play.textContent = running?'Pause':'Play';};
+reset.onclick = ()=>reset();
+multi.onclick = ()=>{showFamily=!showFamily; multi.textContent = showFamily?'Hide angle family':'Show angle family';};
+function worldPoint(p, time){
+  const x = p.V0*Math.cos(p.A)*time;
+  const y = p.V0*Math.sin(p.A)*time - 0.5*p.G*time*time;
+  return {x, y};
+}
+function drawAxes(scale, ox, oy){
+  ctx.strokeStyle = '#666'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(60, oy); ctx.lineTo(c.width-20, oy); ctx.moveTo(ox, oy); ctx.lineTo(ox, 30); ctx.stroke();
+  for(let i=0;i<12;i++){ const x = ox + i*80; ctx.beginPath(); ctx.moveTo(x, oy-4); ctx.lineTo(x, oy+4); ctx.stroke(); }
+  for(let i=0;i<6;i++){ const y = oy - i*80; ctx.beginPath(); ctx.moveTo(ox-4, y); ctx.lineTo(ox+4, y); ctx.stroke(); }
+  ctx.fillStyle='#444'; ctx.fillText('x', c.width-26, oy-8); ctx.fillText('y', ox+8, 38);
+}
+function draw(){
+  const p = params();
+  ctx.clearRect(0,0,c.width,c.height);
+  const ox = 70, oy = c.height-60;
+  const scale = Math.min((c.width-120)/Math.max(1,p.R*1.08),(c.height-120)/Math.max(1,p.H*1.7));
+  drawAxes(scale, ox, oy);
+
+  if(showFamily){
+    ctx.lineWidth = 1.2;
+    for(let deg=15; deg<=75; deg+=15){
+      const q = { ...p, A: deg*Math.PI/180, T: 2*p.V0*Math.sin(deg*Math.PI/180)/p.G };
+      ctx.beginPath();
+      for(let i=0;i<=120;i++){
+        const tt = q.T*i/120, pt = worldPoint(q, tt), sx = ox+pt.x*scale, sy = oy-pt.y*scale;
+        if(i===0) ctx.moveTo(sx,sy); else ctx.lineTo(sx,sy);
+      }
+      ctx.strokeStyle = `hsla(${deg*4},70%,45%,0.6)`; ctx.stroke();
+      ctx.fillStyle = ctx.strokeStyle; ctx.fillText(`${deg}°`, ox + q.V0*q.V0*Math.sin(2*q.A)/q.G*scale - 20, oy + 20);
+    }
+  }
+
+  ctx.strokeStyle = '#1f6feb'; ctx.lineWidth = 2.5; ctx.beginPath();
+  for(let i=0;i<=200;i++){
+    const tt = p.T*i/200, pt = worldPoint(p, tt), sx = ox+pt.x*scale, sy = oy-pt.y*scale;
+    if(i===0) ctx.moveTo(sx,sy); else ctx.lineTo(sx,sy);
+  }
+  ctx.stroke();
+
+  const time = Math.min(t, p.T);
+  const pt = worldPoint(p,time);
+  trace.push({...pt}); if(trace.length>600) trace.shift();
+  ctx.strokeStyle = '#d63384'; ctx.lineWidth = 2; ctx.beginPath();
+  trace.forEach((q,i)=>{ const sx=ox+q.x*scale, sy=oy-q.y*scale; if(i===0) ctx.moveTo(sx,sy); else ctx.lineTo(sx,sy); });
+  ctx.stroke();
+
+  const sx=ox+pt.x*scale, sy=oy-pt.y*scale;
+  ctx.fillStyle='#111'; ctx.beginPath(); ctx.arc(sx,sy,7,0,Math.PI*2); ctx.fill();
+
+  const vx = p.V0*Math.cos(p.A), vy = p.V0*Math.sin(p.A)-p.G*time;
+  const s = 0.9;
+  ctx.strokeStyle='#159957'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(sx,sy); ctx.lineTo(sx+vx*scale*s, sy-vy*scale*s); ctx.stroke();
+  ctx.strokeStyle='#e55353'; ctx.beginPath(); ctx.moveTo(sx,sy); ctx.lineTo(sx, sy+p.G*scale*2.2); ctx.stroke();
+  ctx.fillStyle='#159957'; ctx.fillText('v', sx+vx*scale*s+6, sy-vy*scale*s);
+  ctx.fillStyle='#e55353'; ctx.fillText('g', sx+8, sy+p.G*scale*2.2+2);
+
+  ctx.fillStyle='#111';
+  ctx.fillText(`t = ${time.toFixed(2)} s`, 760, 40);
+  ctx.fillText(`x = ${pt.x.toFixed(2)} m`, 760, 62);
+  ctx.fillText(`y = ${Math.max(0,pt.y).toFixed(2)} m`, 760, 84);
+}
+function animate(ts){
+  if(!prev) prev = ts; const dt = (ts-prev)/1000; prev = ts;
+  const p = params();
+  if(running){ t += dt*0.9; if(t>p.T+0.4) reset(); }
+  draw(); requestAnimationFrame(animate);
+}
+updateLabels(); requestAnimationFrame(animate);
+</script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cycloid Animation</title>
+<style>body{font-family:Arial,sans-serif;background:#f6f7fb;margin:0}.wrap{max-width:1200px;margin:20px auto;padding:0 16px;color:#222}h1{margin:0 0 8px}.controls,.panel{background:#fff;border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.08);padding:14px}.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:16px 0}canvas{width:100%;display:block;height:auto}button{padding:8px 12px;border:0;border-radius:10px;background:#1f6feb;color:#fff;cursor:pointer}</style></head><body><div class="wrap"><h1>Cycloid: Rolling Circle</h1><p>A point on the rim traces a cycloid while the circle rolls without slipping.</p><div class="controls"><label>Radius R = <span id="rVal"></span><input id="R" type="range" min="20" max="90" value="45"></label><label>Angular speed ω = <span id="wVal"></span><input id="W" type="range" min="0.5" max="3" step="0.1" value="1.4"></label><label><input id="vectors" type="checkbox" checked> Show v and a vectors</label><div><button id="toggle">Pause</button><button id="reset">Reset</button></div><div id="info"></div></div><div class="panel"><canvas id="cv" width="1150" height="560"></canvas></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');let t=0,last=0,run=true,trace=[];function upd(){rVal.textContent=R.value;wVal.textContent=(+W.value).toFixed(1)}[R,W,vectors].forEach(el=>el.addEventListener('input',()=>{upd();if(el!==vectors)trace=[];}));toggle.onclick=()=>{run=!run;toggle.textContent=run?'Pause':'Play';};reset.onclick=()=>{t=0;trace=[];};upd();
+function A(x1,y1,x2,y2,c,l){ctx.strokeStyle=c;ctx.fillStyle=c;ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();const a=Math.atan2(y2-y1,x2-x1),h=9;ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(x2-h*Math.cos(a-Math.PI/6),y2-h*Math.sin(a-Math.PI/6));ctx.lineTo(x2-h*Math.cos(a+Math.PI/6),y2-h*Math.sin(a+Math.PI/6));ctx.closePath();ctx.fill();ctx.fillText(l,x2+6,y2+6)}
+function draw(){ctx.clearRect(0,0,cv.width,cv.height);const Rr=+R.value,w=+W.value,ground=420,baseX=80,scale=2.5;ctx.strokeStyle='#555';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(20,ground);ctx.lineTo(cv.width-20,ground);ctx.stroke();const th=w*t;const cx=baseX+Rr*scale*th, cy=ground-Rr*scale; const px=baseX+Rr*scale*(th-Math.sin(th)), py=ground-Rr*scale*(1-Math.cos(th));
+trace.push([px,py]); if(trace.length>1400) trace.shift();
+ctx.strokeStyle='#d63384'; ctx.lineWidth=2.5; ctx.beginPath(); trace.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1])); ctx.stroke();
+ctx.strokeStyle='#1f6feb'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(cx,cy,Rr*scale,0,Math.PI*2); ctx.stroke();
+ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(px,py); ctx.stroke();
+ctx.fillStyle='#111'; ctx.beginPath(); ctx.arc(cx,cy,4,0,Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(px,py,7,0,Math.PI*2); ctx.fill();
+const contactX=baseX+Rr*scale*th; ctx.fillStyle='#666'; ctx.beginPath(); ctx.arc(contactX,ground,4,0,Math.PI*2); ctx.fill();
+if(vectors.checked){const vx=Rr*w*(1-Math.cos(th)), vy=Rr*w*Math.sin(th), ax=Rr*w*w*Math.sin(th), ay=Rr*w*w*Math.cos(th); A(px,py,px+vx*scale*1.8,py-vy*scale*1.8,'#159957','v'); A(px,py,px+ax*scale*1.2,py-ay*scale*1.2,'#e55353','a');}
+const speed=Rr*w*Math.sqrt((1-Math.cos(th))**2+Math.sin(th)**2), amag=Rr*w*w*Math.sqrt(Math.sin(th)**2+Math.cos(th)**2);
+info.innerHTML=`|v| = <b>${speed.toFixed(2)}</b>, |a| = <b>${amag.toFixed(2)}</b>. The point stops when θ = 2πk.`;
+ctx.fillStyle='#222'; ctx.fillText(`x=R(ωt-sin ωt), y=R(1-cos ωt)`,820,50); ctx.fillText(`t=${t.toFixed(2)} s`,820,74); ctx.fillText(`Rolling without slipping`,820,98);
+}
+function anim(ts){if(!last)last=ts;const dt=(ts-last)/1000;last=ts;if(run){t+=dt;if(baseOverflow()) {t=0;trace=[];}}draw();requestAnimationFrame(anim);}function baseOverflow(){const Rr=+R.value,w=+W.value;return (80+Rr*2.5*w*t)>cv.width-80;}requestAnimationFrame(anim);
+</script></body></html>

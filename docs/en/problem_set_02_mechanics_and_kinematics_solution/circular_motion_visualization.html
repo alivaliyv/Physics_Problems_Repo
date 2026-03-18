@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Circular Motion Visualization</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f5f7fb;margin:0;color:#222}.wrap{max-width:1050px;margin:24px auto;padding:0 16px}h1{margin-bottom:8px}.panel{background:#fff;padding:14px;border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.08)}.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px}.controls label{font-size:14px}canvas{width:100%;height:auto;display:block}button{padding:8px 12px;border:0;border-radius:10px;background:#1f6feb;color:white;cursor:pointer}
+</style></head><body><div class="wrap"><h1>Circular Motion</h1><p>Position, velocity, and centripetal acceleration vectors for uniform circular motion.</p><div class="panel controls"><label>Radius R = <span id="rVal"></span><input id="R" type="range" min="40" max="180" value="120"></label><label>Angular speed ω = <span id="wVal"></span> rad/s<input id="W" type="range" min="0.2" max="3.0" step="0.1" value="1.2"></label><label><input id="trail" type="checkbox" checked> Show trail</label><div><button id="toggle">Pause</button></div><div id="info"></div></div><div class="panel"><canvas id="cv" width="960" height="620"></canvas></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');let t=0,last=0,run=true,pts=[];
+function upd(){rVal.textContent=R.value;wVal.textContent=(+W.value).toFixed(1);}
+[R,W,trail].forEach(el=>el.addEventListener('input',()=>{upd();if(el===R)pts=[];}));toggle.onclick=()=>{run=!run;toggle.textContent=run?'Pause':'Play';};upd();
+function arrow(x1,y1,x2,y2,color,label){ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();const a=Math.atan2(y2-y1,x2-x1),h=10;ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(x2-h*Math.cos(a-Math.PI/6),y2-h*Math.sin(a-Math.PI/6));ctx.lineTo(x2-h*Math.cos(a+Math.PI/6),y2-h*Math.sin(a+Math.PI/6));ctx.closePath();ctx.fill();ctx.fillText(label,x2+8,y2+8);}
+function draw(){ctx.clearRect(0,0,cv.width,cv.height);const cx=340,cy=310,Rr=+R.value,w=+W.value;ctx.strokeStyle='#c9d1d9';ctx.lineWidth=2;ctx.beginPath();ctx.arc(cx,cy,Rr,0,Math.PI*2);ctx.stroke();ctx.strokeStyle='#999';ctx.beginPath();ctx.moveTo(40,cy);ctx.lineTo(cv.width-30,cy);ctx.moveTo(cx,40);ctx.lineTo(cx,cv.height-30);ctx.stroke();ctx.fillStyle='#444';ctx.fillText('O',cx+8,cy-8);
+const x=cx+Rr*Math.cos(w*t),y=cy+Rr*Math.sin(w*t);pts.push([x,y]);if(pts.length>500)pts.shift();if(trail.checked){ctx.strokeStyle='rgba(31,111,235,.5)';ctx.lineWidth=2;ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke();}
+arrow(cx,cy,x,y,'#1f6feb','r');const vx=-Rr*w*Math.sin(w*t), vy=Rr*w*Math.cos(w*t); arrow(x,y,x+vx*0.5,y+vy*0.5,'#159957','v'); const ax=-Rr*w*w*Math.cos(w*t), ay=-Rr*w*w*Math.sin(w*t); arrow(x,y,x+ax*0.5,y+ay*0.5,'#e55353','a');
+ctx.fillStyle='#111';ctx.beginPath();ctx.arc(x,y,8,0,Math.PI*2);ctx.fill();
+info.innerHTML=`|r| = <b>${Rr.toFixed(1)}</b>, |v| = <b>${(Rr*w).toFixed(1)}</b>, |a| = <b>${(Rr*w*w).toFixed(1)}</b>`;
+ctx.fillText(`x(t)=R cos(ωt), y(t)=R sin(ωt)`,620,50);ctx.fillText(`t = ${t.toFixed(2)} s`,620,75);ctx.fillText(`Acceleration points toward the center.`,620,100);
+}
+function anim(ts){if(!last)last=ts;const dt=(ts-last)/1000;last=ts;if(run)t+=dt;draw();requestAnimationFrame(anim);}requestAnimationFrame(anim);
+</script></body></html>

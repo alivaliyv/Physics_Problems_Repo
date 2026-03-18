@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Relative Motion Frames</title>
+<style>body{font-family:Arial,sans-serif;background:#f6f7fb;margin:0;color:#222}.wrap{max-width:1280px;margin:20px auto;padding:0 16px}h1{margin:0 0 8px}.controls,.panel{background:#fff;border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.08);padding:14px}.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:16px 0}canvas{width:100%;display:block;height:auto}button{padding:8px 12px;border:0;border-radius:10px;background:#1f6feb;color:#fff;cursor:pointer}</style></head><body><div class="wrap"><h1>Relative Motion in Three Frames</h1><p>Default problem values: <b>v<sub>A</sub> = (3,1)</b>, <b>v<sub>B</sub> = (1,-2)</b>. Relative velocity is <b>v<sub>A/B</sub> = (2,3)</b>.</p><div class="controls"><div><button id="toggle">Pause</button><button id="reset">Reset</button></div><div id="info"></div></div><div class="panel"><canvas id="cv" width="1240" height="560"></canvas></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');let t=0,last=0,run=true,trace0A=[],trace0B=[],traceAB=[],traceBA=[];const vA={x:3,y:1},vB={x:1,y:-2};toggle.onclick=()=>{run=!run;toggle.textContent=run?'Pause':'Play';};reset.onclick=()=>{t=0;trace0A=[];trace0B=[];traceAB=[];traceBA=[];};
+function drawPanel(x0,y0,w,h,title,mode){ctx.save();ctx.translate(x0,y0);ctx.strokeStyle='#ddd';ctx.strokeRect(0,0,w,h);ctx.fillStyle='#222';ctx.font='16px Arial';ctx.fillText(title,12,22);const cx=w/2,cy=h/2,s=30;ctx.strokeStyle='#999';ctx.beginPath();ctx.moveTo(20,cy);ctx.lineTo(w-20,cy);ctx.moveTo(cx,30);ctx.lineTo(cx,h-20);ctx.stroke();
+let A={x:vA.x*t,y:vA.y*t},B={x:vB.x*t,y:vB.y*t}; if(mode==='A'){A={x:0,y:0};B={x:(vB.x-vA.x)*t,y:(vB.y-vA.y)*t};} if(mode==='B'){A={x:(vA.x-vB.x)*t,y:(vA.y-vB.y)*t};B={x:0,y:0};}
+const As=[cx+A.x*s,cy-A.y*s], Bs=[cx+B.x*s,cy-B.y*s];
+ctx.fillStyle='#1f6feb'; ctx.beginPath(); ctx.arc(As[0],As[1],7,0,Math.PI*2); ctx.fill(); ctx.fillText('A',As[0]+10,As[1]-8);
+ctx.fillStyle='#e55353'; ctx.beginPath(); ctx.arc(Bs[0],Bs[1],7,0,Math.PI*2); ctx.fill(); ctx.fillText('B',Bs[0]+10,Bs[1]-8);
+ctx.restore(); return {A,B}; }
+function draw(){ctx.clearRect(0,0,cv.width,cv.height);const p0=drawPanel(10,10,400,540,'Frame O (fixed origin)','O');const pA=drawPanel(420,10,400,540,'Frame attached to A','A');const pB=drawPanel(830,10,400,540,'Frame attached to B','B');
+info.innerHTML=`v<sub>A/B</sub> = (${(vA.x-vB.x).toFixed(1)}, ${(vA.y-vB.y).toFixed(1)}) and v<sub>B/A</sub> = (${(vB.x-vA.x).toFixed(1)}, ${(vB.y-vA.y).toFixed(1)}). Direction of A relative to B: atan2(3,2) ≈ ${(Math.atan2(3,2)*180/Math.PI).toFixed(1)}°.`;
+}
+function anim(ts){if(!last)last=ts;const dt=(ts-last)/1000;last=ts;if(run){t+=dt*0.7;if(t>6)t=0;}draw();requestAnimationFrame(anim);}requestAnimationFrame(anim);
+</script></body></html>
