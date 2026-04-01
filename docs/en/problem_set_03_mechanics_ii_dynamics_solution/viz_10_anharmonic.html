@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Task 10 – Anharmonic Oscillator</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0a0a12; color: #e8e4d8;
+    font-family: 'Courier New', monospace;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 24px 16px; min-height: 100vh;
+  }
+  h1 { font-size: 1.05rem; letter-spacing: 0.12em; color: #a8c8ff; margin-bottom: 4px; text-transform: uppercase; }
+  .subtitle { font-size: 0.78rem; color: #667; margin-bottom: 18px; text-align: center; }
+  .layout { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; align-items: flex-start; }
+  canvas { border: 1px solid #222; background: #070711; display: block; }
+  .ctrl { background: #11111e; border: 1px solid #222; padding: 16px; width: 240px; font-size: 0.77rem; }
+  .ctrl h2 { font-size: 0.78rem; color: #a8c8ff; letter-spacing: 0.1em; margin-bottom: 10px; border-bottom: 1px solid #222; padding-bottom: 5px; }
+  label { display: flex; justify-content: space-between; color: #889; margin-bottom: 4px; }
+  input[type=range] { width: 100%; accent-color: #4af; margin-bottom: 10px; }
+  .val { color: #ffd97d; }
+  .result { font-size: 0.74rem; line-height: 2; color: #aaa; }
+  button { width:100%; background:#1a1a30; color:#a8c8ff; border:1px solid #334; padding:7px; cursor:pointer; font-family:inherit; font-size:0.77rem; margin-top:6px; }
+  button:hover { background:#252545; }
+  .legend { margin-top:12px; font-size:0.72rem; line-height:2.0; }
+  .leg { display:flex; align-items:center; gap:7px; }
+  .ls { width:16px; height:3px; border-radius:1px; }
+  select { background:#1a1a30; color:#a8c8ff; border:1px solid #334; padding:4px; font-family:inherit; font-size:0.77rem; width:100%; margin-bottom:10px; }
+</style>
+</head>
+<body>
+<h1>Task 10 — Anharmonic Oscillator</h1>
+<p class="subtitle">U(x) = k/2·x² + λx⁴ &nbsp;|&nbsp; RK4 Numerical Integration</p>
+<div class="layout">
+  <div>
+    <canvas id="cvU" width="500" height="160"></canvas>
+    <canvas id="cvX" width="500" height="200" style="margin-top:8px;"></canvas>
+    <canvas id="cvP" width="500" height="220" style="margin-top:8px;"></canvas>
+  </div>
+  <div class="ctrl">
+    <h2>POTENTIAL PARAMETERS</h2>
+    <label>k (harmonic)<span class="val" id="dK">1.0</span></label>
+    <input type="range" id="slK" min="-2" max="5" step="0.1" value="1">
+    <label>λ (quartic)<span class="val" id="dL">0.1</span></label>
+    <input type="range" id="slL" min="-0.5" max="2" step="0.05" value="0.1">
+    <label>m (mass)<span class="val" id="dM">1.0 kg</span></label>
+    <input type="range" id="slM" min="0.2" max="3" step="0.1" value="1">
+    <h2 style="margin-top:10px;">INITIAL CONDITIONS</h2>
+    <label>x(0)<span class="val" id="dX0">2.0</span></label>
+    <input type="range" id="slX0" min="-4" max="4" step="0.1" value="2">
+    <label>ẋ(0)<span class="val" id="dV0">0.0</span></label>
+    <input type="range" id="slV0" min="-5" max="5" step="0.2" value="0">
+    <h2 style="margin-top:10px;">COMPARE</h2>
+    <label style="margin-bottom:4px;">Show harmonic</label>
+    <select id="selComp">
+      <option value="yes">Yes (k only, λ=0)</option>
+      <option value="no">No</option>
+    </select>
+    <button id="btnRun">▶ RUN / REFRESH</button>
+    <h2 style="margin-top:12px;">RESULTS</h2>
+    <div class="result">
+      <div>E₀ = <span class="val" id="rE">–</span></div>
+      <div>ω₀ = √(k/m) = <span class="val" id="rW">–</span></div>
+      <div>regime = <span class="val" id="rReg">–</span></div>
+    </div>
+    <div class="legend">
+      <div class="leg"><div class="ls" style="background:#ffd97d"></div>Anharmonic x(t)</div>
+      <div class="leg"><div class="ls" style="background:#55aaff"></div>Harmonic reference</div>
+      <div class="leg"><div class="ls" style="background:#ff6655"></div>Phase portrait</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const cvU=document.getElementById('cvU'),cvX=document.getElementById('cvX'),cvP=document.getElementById('cvP');
+const ctxU=cvU.getContext('2d'),ctxX=cvX.getContext('2d'),ctxP=cvP.getContext('2d');
+
+function rk4(x,v,k,lam,m,dt){
+  function acc(xi,vi){return -k/m*xi - 4*lam/m*xi*xi*xi;}
+  const k1v=acc(x,v), k1x=v;
+  const k2v=acc(x+k1x*dt/2,v+k1v*dt/2), k2x=v+k1v*dt/2;
+  const k3v=acc(x+k2x*dt/2,v+k2v*dt/2), k3x=v+k2v*dt/2;
+  const k4v=acc(x+k3x*dt,v+k3v*dt), k4x=v+k3v*dt;
+  return {
+    x:x+dt*(k1x+2*k2x+2*k3x+k4x)/6,
+    v:v+dt*(k1v+2*k2v+2*k3v+k4v)/6
+  };
+}
+
+function simulate(k,lam,m,x0,v0,Tend,dt){
+  const pts=[];
+  let x=x0,v=v0,t=0;
+  while(t<=Tend){
+    pts.push({t,x,v});
+    const s=rk4(x,v,k,lam,m,dt);
+    x=s.x; v=s.v; t+=dt;
+    if(Math.abs(x)>20) break; // diverged
+  }
+  return pts;
+}
+
+const pad={l:48,r:16,t:22,b:34};
+
+function mkScale(W,H,tMax,xMin,xMax){
+  const pw=W-pad.l-pad.r, ph=H-pad.t-pad.b;
+  return {
+    tx:t=>pad.l+t/tMax*pw,
+    ty:y=>pad.t+(xMax-y)/(xMax-xMin)*ph,
+    pw,ph
+  };
+}
+
+function drawAxesT(ctx,W,H,sc,xlabel,ylabel){
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle='#161625'; ctx.lineWidth=1;
+  for(let i=0;i<=8;i++){const x=pad.l+i*sc.pw/8;ctx.beginPath();ctx.moveTo(x,pad.t);ctx.lineTo(x,H-pad.b);ctx.stroke();}
+  for(let i=0;i<=4;i++){const y=pad.t+i*sc.ph/4;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();}
+  ctx.strokeStyle='#2a2a4a'; ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(pad.l,pad.t);ctx.lineTo(pad.l,H-pad.b);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(pad.l,H-pad.b);ctx.lineTo(W-pad.r,H-pad.b);ctx.stroke();
+  ctx.fillStyle='#445'; ctx.font='10px Courier New'; ctx.textAlign='center';
+  ctx.fillText(xlabel,pad.l+sc.pw/2,H-4);
+  ctx.save();ctx.translate(12,pad.t+sc.ph/2);ctx.rotate(-Math.PI/2);ctx.fillText(ylabel,0,0);ctx.restore();
+}
+
+function run(){
+  const k=parseFloat(document.getElementById('slK').value);
+  const lam=parseFloat(document.getElementById('slL').value);
+  const m=parseFloat(document.getElementById('slM').value);
+  const x0=parseFloat(document.getElementById('slX0').value);
+  const v0=parseFloat(document.getElementById('slV0').value);
+  const showH=document.getElementById('selComp').value==='yes';
+
+  document.getElementById('dK').textContent=k.toFixed(1);
+  document.getElementById('dL').textContent=lam.toFixed(2);
+  document.getElementById('dM').textContent=m.toFixed(1)+' kg';
+  document.getElementById('dX0').textContent=x0.toFixed(1);
+  document.getElementById('dV0').textContent=v0.toFixed(1);
+
+  const E0=0.5*m*v0*v0+0.5*k*x0*x0+lam*x0*x0*x0*x0;
+  document.getElementById('rE').textContent=E0.toFixed(4)+' J';
+  const w0=k>0?Math.sqrt(k/m):NaN;
+  document.getElementById('rW').textContent=k>0?w0.toFixed(4)+' rad/s':'N/A';
+
+  let regime='periodic';
+  if(lam<0&&k<0) regime='unstable';
+  else if(lam<0&&k>0) regime='double-well';
+  else if(lam>0&&k>0) regime='anharmonic';
+  else if(lam===0) regime='harmonic';
+  document.getElementById('rReg').textContent=regime;
+
+  const Tend=k>0?Math.max(8*2*Math.PI/w0,10):30;
+  const dt=0.005;
+  const pts=simulate(k,lam,m,x0,v0,Tend,dt);
+  const ptsH=showH&&k>0?simulate(k,0,m,x0,v0,Tend,dt):[];
+  const tMax=pts[pts.length-1].t;
+
+  // U(x) plot
+  const xRange=Math.max(Math.abs(x0)*1.5,3);
+  const xPts=[];
+  for(let i=0;i<=200;i++){
+    const x=-xRange+2*xRange*i/200;
+    xPts.push({x,U:0.5*k*x*x+lam*x*x*x*x});
+  }
+  const Uvals=xPts.map(p=>p.U);
+  const Umax=Math.min(Math.max(...Uvals),E0*3+2), Umin=Math.min(Math.min(...Uvals),-0.5);
+  const WU=500,HU=160;
+  const scU={
+    tx:x=>pad.l+(x+xRange)/(2*xRange)*(WU-pad.l-pad.r),
+    ty:U=>pad.t+(Umax-U)/(Umax-Umin)*(HU-pad.t-pad.b)
+  };
+  ctxU.clearRect(0,0,WU,HU);
+  ctx2grid(ctxU,WU,HU);
+  // U curve
+  ctxU.beginPath();
+  xPts.forEach((p,i)=>{
+    if(p.U>Umax+1||p.U<Umin-1){ctxU.moveTo(scU.tx(p.x),scU.ty(Math.max(Math.min(p.U,Umax),Umin)));return;}
+    i===0?ctxU.moveTo(scU.tx(p.x),scU.ty(p.U)):ctxU.lineTo(scU.tx(p.x),scU.ty(p.U));
+  });
+  ctxU.strokeStyle='#aa66ff'; ctxU.lineWidth=2.5; ctxU.stroke();
+  // E0 line
+  const cyE=scU.ty(E0);
+  if(cyE>=pad.t&&cyE<=HU-pad.b){
+    ctxU.setLineDash([5,4]);ctxU.strokeStyle='#ffd97d';ctxU.lineWidth=1.2;
+    ctxU.beginPath();ctxU.moveTo(pad.l,cyE);ctxU.lineTo(WU-pad.r,cyE);ctxU.stroke();ctxU.setLineDash([]);
+    ctxU.fillStyle='#ffd97d';ctxU.font='10px Courier New';ctxU.textAlign='left';
+    ctxU.fillText('E₀',WU-pad.r+2,cyE+4);
+  }
+  // x0 mark
+  ctxU.beginPath();ctxU.arc(scU.tx(x0),scU.ty(E0),4,0,Math.PI*2);
+  ctxU.fillStyle='#ffd97d';ctxU.fill();
+  ctxU.fillStyle='#a8c8ff';ctxU.font='11px Courier New';ctxU.textAlign='left';
+  ctxU.fillText(`U(x) = k/2·x² + λx⁴`, pad.l+4, pad.t+14);
+  ctxU.fillStyle='#445';ctxU.textAlign='center';ctxU.fillText('x [m]',pad.l+(WU-pad.l-pad.r)/2,HU-4);
+
+  // x(t) plot
+  const allX=pts.map(p=>Math.abs(p.x));
+  const xMaxPlt=Math.max(...allX)*1.2;
+  const scXT=mkScale(500,200,tMax,-xMaxPlt,xMaxPlt);
+  drawAxesT(ctxX,500,200,scXT,'t [s]','x [m]');
+  if(showH&&ptsH.length>1){
+    ctxX.beginPath();
+    ptsH.forEach((p,i)=>{const cx=scXT.tx(p.t),cy=scXT.ty(Math.max(-xMaxPlt,Math.min(xMaxPlt,p.x)));i===0?ctxX.moveTo(cx,cy):ctxX.lineTo(cx,cy);});
+    ctxX.strokeStyle='#55aaff55';ctxX.lineWidth=1.5;ctxX.stroke();
+  }
+  ctxX.beginPath();
+  pts.forEach((p,i)=>{const cx=scXT.tx(p.t),cy=scXT.ty(Math.max(-xMaxPlt,Math.min(xMaxPlt,p.x)));i===0?ctxX.moveTo(cx,cy):ctxX.lineTo(cx,cy);});
+  ctxX.strokeStyle='#ffd97d';ctxX.lineWidth=2;ctxX.stroke();
+  ctxX.fillStyle='#a8c8ff';ctxX.font='11px Courier New';ctxX.textAlign='left';
+  ctxX.fillText('x(t) — RK4',pad.l+4,pad.t+14);
+
+  // Phase portrait
+  const allV=pts.map(p=>Math.abs(p.v));
+  const vMaxPlt=Math.max(...allV)*1.2;
+  const scP={
+    px:x=>pad.l+(x+xMaxPlt)/(2*xMaxPlt)*(500-pad.l-pad.r),
+    py:v=>pad.t+(vMaxPlt-v)/(2*vMaxPlt)*(220-pad.t-pad.b),
+    pw:500-pad.l-pad.r,ph:220-pad.t-pad.b
+  };
+  ctxP.clearRect(0,0,500,220);
+  ctx2grid(ctxP,500,220);
+  ctxP.strokeStyle='#2a2a4a';ctxP.lineWidth=1.5;
+  ctxP.beginPath();ctxP.moveTo(pad.l,scP.py(0));ctxP.lineTo(500-pad.r,scP.py(0));ctxP.stroke();
+  ctxP.beginPath();ctxP.moveTo(scP.px(0),pad.t);ctxP.lineTo(scP.px(0),220-pad.b);ctxP.stroke();
+  if(showH&&ptsH.length>1){
+    ctxP.beginPath();
+    ptsH.forEach((p,i)=>{const cx=scP.px(p.x),cy=scP.py(p.v);i===0?ctxP.moveTo(cx,cy):ctxP.lineTo(cx,cy);});
+    ctxP.strokeStyle='#55aaff55';ctxP.lineWidth=1.5;ctxP.stroke();
+  }
+  ctxP.beginPath();
+  pts.forEach((p,i)=>{
+    const cx=scP.px(Math.max(-xMaxPlt,Math.min(xMaxPlt,p.x)));
+    const cy=scP.py(Math.max(-vMaxPlt,Math.min(vMaxPlt,p.v)));
+    i===0?ctxP.moveTo(cx,cy):ctxP.lineTo(cx,cy);
+  });
+  ctxP.strokeStyle='#ff6655';ctxP.lineWidth=2;ctxP.stroke();
+  // Start point
+  ctxP.beginPath();ctxP.arc(scP.px(x0),scP.py(v0),5,0,Math.PI*2);
+  ctxP.fillStyle='#ffd97d';ctxP.fill();
+  ctxP.fillStyle='#a8c8ff';ctxP.font='11px Courier New';ctxP.textAlign='left';
+  ctxP.fillText('Phase portrait (x, ẋ)',pad.l+4,pad.t+14);
+  ctxP.fillStyle='#445';ctxP.textAlign='center';
+  ctxP.fillText('x [m]',pad.l+scP.pw/2,220-4);
+  ctxP.save();ctxP.translate(12,pad.t+scP.ph/2);ctxP.rotate(-Math.PI/2);ctxP.fillText('ẋ [m/s]',0,0);ctxP.restore();
+}
+
+function ctx2grid(ctx,W,H){
+  ctx.strokeStyle='#161625'; ctx.lineWidth=1;
+  for(let i=0;i<=8;i++){const x=pad.l+i*(W-pad.l-pad.r)/8;ctx.beginPath();ctx.moveTo(x,pad.t);ctx.lineTo(x,H-pad.b);ctx.stroke();}
+  for(let i=0;i<=4;i++){const y=pad.t+i*(H-pad.t-pad.b)/4;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();}
+}
+
+document.getElementById('btnRun').addEventListener('click',run);
+['slK','slL','slM','slX0','slV0'].forEach(id=>document.getElementById(id).addEventListener('input',run));
+run();
+</script>
+</body>
+</html>

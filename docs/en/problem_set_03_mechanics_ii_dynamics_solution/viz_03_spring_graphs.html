@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Task 03 – Spring Force and Potential Energy</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0d0d14;
+    color: #e8e4d8;
+    font-family: 'Courier New', monospace;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 24px 16px; min-height: 100vh;
+  }
+  h1 { font-size: 1.1rem; letter-spacing: 0.12em; color: #a8c8ff; margin-bottom: 4px; text-transform: uppercase; }
+  .subtitle { font-size: 0.78rem; color: #667; margin-bottom: 20px; }
+  .layout { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; align-items: flex-start; }
+  canvas { border: 1px solid #222; background: #070711; display: block; }
+  .ctrl { background: #11111e; border: 1px solid #222; padding: 16px; width: 220px; }
+  .ctrl h2 { font-size: 0.8rem; color: #a8c8ff; letter-spacing: 0.1em; margin-bottom: 12px; }
+  label { font-size: 0.76rem; color: #889; display: flex; justify-content: space-between; margin-bottom: 8px; }
+  input[type=range] { width: 100%; accent-color: #4af; margin: 4px 0 10px; }
+  .val { color: #ffd97d; }
+  .info { font-size: 0.74rem; line-height: 1.8; color: #aaa; margin-top: 12px; border-top: 1px solid #222; padding-top: 10px; }
+  .info span { color: #ffd97d; }
+</style>
+</head>
+<body>
+<h1>Task 03 — Spring Force & Potential Energy</h1>
+<p class="subtitle">F(x) = –kx &nbsp;|&nbsp; U(x) = ½kx²</p>
+<div class="layout">
+  <div>
+    <canvas id="cvF" width="460" height="220"></canvas>
+    <canvas id="cvU" width="460" height="220" style="margin-top:12px;"></canvas>
+  </div>
+  <div class="ctrl">
+    <h2>PARAMETERS</h2>
+    <label>k (spring constant)<span class="val" id="kDisp">1.0 N/m</span></label>
+    <input type="range" id="slK" min="0.2" max="4" step="0.1" value="1">
+    <label>x₀ (evaluate at)<span class="val" id="x0Disp">2.0 m</span></label>
+    <input type="range" id="slX0" min="-4" max="4" step="0.1" value="2">
+    <div class="info">
+      <div>F(x₀) = <span id="Fval">–</span></div>
+      <div>W(0→x₀) = <span id="Wval">–</span></div>
+      <div>U(x₀) = <span id="Uval">–</span></div>
+      <div>Check: W = –ΔU <span id="Check">–</span></div>
+    </div>
+    <div class="info" style="margin-top:8px;">
+      <div style="color:#5d5; font-size:0.73rem;">dU/dx = kx → F = –kx ✓</div>
+      <div style="color:#aab; font-size:0.72rem; margin-top:6px;">The shaded area in F(x) equals –W, which equals U(x₀).</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const cvF = document.getElementById('cvF');
+const cvU = document.getElementById('cvU');
+const ctxF = cvF.getContext('2d');
+const ctxU = cvU.getContext('2d');
+const W = 460, H = 220;
+const xRange = 5; // ±5
+const pad = {l:50,r:20,t:30,b:35};
+const pw = W - pad.l - pad.r, ph = H - pad.t - pad.b;
+
+function toCanvasX(x) { return pad.l + (x + xRange) / (2*xRange) * pw; }
+function toCanvasY(y, yMin, yMax) { return pad.t + (yMax - y) / (yMax - yMin) * ph; }
+
+function drawAxes(ctx, yMin, yMax, xlabel, ylabel) {
+  ctx.strokeStyle = '#2a2a4a'; ctx.lineWidth = 1.5;
+  const y0 = toCanvasY(0, yMin, yMax);
+  ctx.beginPath(); ctx.moveTo(pad.l, y0); ctx.lineTo(W-pad.r, y0); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(toCanvasX(0), pad.t); ctx.lineTo(toCanvasX(0), H-pad.b); ctx.stroke();
+  // Grid
+  ctx.strokeStyle = '#161625'; ctx.lineWidth = 1;
+  for (let x=-4;x<=4;x+=1) {
+    const cx = toCanvasX(x);
+    ctx.beginPath(); ctx.moveTo(cx,pad.t); ctx.lineTo(cx,H-pad.b); ctx.stroke();
+  }
+  ctx.fillStyle='#445'; ctx.font='10px Courier New'; ctx.textAlign='center';
+  for (let x=-4;x<=4;x+=2) { if(x!==0) ctx.fillText(x, toCanvasX(x), H-pad.b+14); }
+  ctx.fillStyle='#778'; ctx.textAlign='left'; ctx.font='11px Courier New';
+  ctx.fillText(xlabel, W-pad.r-12, y0+16);
+  ctx.fillText(ylabel, pad.l+2, pad.t+14);
+}
+
+function draw() {
+  const k = parseFloat(document.getElementById('slK').value);
+  const x0 = parseFloat(document.getElementById('slX0').value);
+
+  document.getElementById('kDisp').textContent = k.toFixed(1)+' N/m';
+  document.getElementById('x0Disp').textContent = x0.toFixed(1)+' m';
+
+  const Fval = -k*x0;
+  const Wval = -0.5*k*x0*x0;
+  const Uval = 0.5*k*x0*x0;
+  document.getElementById('Fval').textContent = Fval.toFixed(3)+' N';
+  document.getElementById('Wval').textContent = Wval.toFixed(3)+' J';
+  document.getElementById('Uval').textContent = Uval.toFixed(3)+' J';
+  document.getElementById('Check').textContent = (Math.abs(Wval+Uval)<0.001)?'✓ yes':'✗';
+
+  // Draw F(x) = -kx
+  const Fmax = k*xRange*1.1, Fmin = -Fmax;
+  ctxF.clearRect(0,0,W,H);
+  drawAxes(ctxF, Fmin, Fmax, 'x [m]', 'F [N]');
+
+  // Shaded area between 0 and x0
+  if (Math.abs(x0) > 0.01) {
+    ctxF.beginPath();
+    const x0c = toCanvasX(x0), xoc = toCanvasX(0);
+    const y0c = toCanvasY(0, Fmin, Fmax);
+    const yx0c = toCanvasY(-k*x0, Fmin, Fmax);
+    ctxF.moveTo(xoc, y0c);
+    // line from 0,0 to x0,F(x0)
+    for (let i=0;i<=60;i++) {
+      const xi = (x0*i/60);
+      ctxF.lineTo(toCanvasX(xi), toCanvasY(-k*xi, Fmin, Fmax));
+    }
+    ctxF.lineTo(x0c, y0c);
+    ctxF.closePath();
+    ctxF.fillStyle = x0>0 ? 'rgba(255,80,60,0.15)' : 'rgba(80,200,120,0.15)';
+    ctxF.fill();
+    // Area label
+    ctxF.fillStyle = '#ff9977'; ctxF.font='10px Courier New'; ctxF.textAlign='center';
+    ctxF.fillText('W = '+(Wval).toFixed(2)+' J', (xoc+x0c)/2, y0c-10*Math.sign(x0));
+  }
+
+  // F(x) line
+  ctxF.beginPath();
+  for (let i=0;i<=200;i++) {
+    const xi = -xRange + 2*xRange*i/200;
+    const yi = -k*xi;
+    if (yi>Fmax || yi<Fmin) continue;
+    const cx=toCanvasX(xi), cy=toCanvasY(yi,Fmin,Fmax);
+    i===0?ctxF.moveTo(cx,cy):ctxF.lineTo(cx,cy);
+  }
+  ctxF.strokeStyle='#ff6644'; ctxF.lineWidth=2.5; ctxF.stroke();
+
+  // x0 marker
+  const cx0 = toCanvasX(x0), cyx0 = toCanvasY(-k*x0, Fmin, Fmax), cy0F = toCanvasY(0,Fmin,Fmax);
+  ctxF.beginPath(); ctxF.arc(cx0, cyx0, 5, 0, Math.PI*2);
+  ctxF.fillStyle='#ffd97d'; ctxF.fill();
+  ctxF.strokeStyle='#222'; ctxF.lineWidth=1.5; ctxF.stroke();
+  ctxF.setLineDash([4,4]); ctxF.strokeStyle='#443';
+  ctxF.beginPath(); ctxF.moveTo(cx0,cy0F); ctxF.lineTo(cx0,cyx0); ctxF.stroke();
+  ctxF.setLineDash([]);
+
+  // Title
+  ctxF.fillStyle='#a8c8ff'; ctxF.font='12px Courier New'; ctxF.textAlign='left';
+  ctxF.fillText('F(x) = –kx', pad.l+4, pad.t+14);
+
+  // Draw U(x) = 0.5*k*x^2
+  const Umax = 0.5*k*xRange*xRange*1.1;
+  ctxU.clearRect(0,0,W,H);
+  drawAxes(ctxU, 0, Umax, 'x [m]', 'U [J]');
+
+  ctxU.beginPath();
+  for (let i=0;i<=200;i++) {
+    const xi = -xRange + 2*xRange*i/200;
+    const yi = 0.5*k*xi*xi;
+    if (yi>Umax) continue;
+    const cx=toCanvasX(xi), cy=toCanvasY(yi,0,Umax);
+    i===0?ctxU.moveTo(cx,cy):ctxU.lineTo(cx,cy);
+  }
+  ctxU.strokeStyle='#55aaff'; ctxU.lineWidth=2.5; ctxU.stroke();
+
+  // x0 point
+  const cx0U = toCanvasX(x0), cy0Ux0 = toCanvasY(Uval,0,Umax), cy0Ub = toCanvasY(0,0,Umax);
+  ctxU.setLineDash([4,4]); ctxU.strokeStyle='#443';
+  ctxU.beginPath(); ctxU.moveTo(cx0U,cy0Ub); ctxU.lineTo(cx0U,cy0Ux0); ctxU.stroke();
+  ctxU.setLineDash([]);
+  ctxU.beginPath(); ctxU.arc(cx0U, cy0Ux0, 5, 0, Math.PI*2);
+  ctxU.fillStyle='#ffd97d'; ctxU.fill();
+  ctxU.strokeStyle='#222'; ctxU.lineWidth=1.5; ctxU.stroke();
+  ctxU.fillStyle='#ffd97d'; ctxU.font='10px Courier New'; ctxU.textAlign='left';
+  ctxU.fillText('U(x₀)='+Uval.toFixed(2), cx0U+8, cy0Ux0-4);
+  ctxU.fillStyle='#a8c8ff'; ctxU.font='12px Courier New'; ctxU.textAlign='left';
+  ctxU.fillText('U(x) = ½kx²', pad.l+4, pad.t+14);
+}
+
+document.getElementById('slK').addEventListener('input', draw);
+document.getElementById('slX0').addEventListener('input', draw);
+draw();
+</script>
+</body>
+</html>

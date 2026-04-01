@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Task 08 – Harmonic Oscillator Phase Space</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0d0d14; color: #e8e4d8;
+    font-family: 'Courier New', monospace;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 24px 16px; min-height: 100vh;
+  }
+  h1 { font-size: 1.05rem; letter-spacing: 0.12em; color: #a8c8ff; margin-bottom: 4px; text-transform: uppercase; }
+  .subtitle { font-size: 0.78rem; color: #667; margin-bottom: 20px; }
+  .layout { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; align-items: flex-start; }
+  canvas { border: 1px solid #222; background: #070711; }
+  .ctrl { background: #11111e; border: 1px solid #222; padding: 16px; width: 220px; font-size: 0.77rem; }
+  .ctrl h2 { font-size: 0.78rem; color: #a8c8ff; letter-spacing: 0.1em; margin-bottom: 10px; border-bottom: 1px solid #222; padding-bottom:5px; }
+  label { display: flex; justify-content: space-between; color: #889; margin-bottom: 4px; }
+  input[type=range] { width: 100%; accent-color: #4af; margin-bottom: 10px; }
+  .val { color: #ffd97d; }
+  .result { font-size: 0.74rem; line-height: 2; color: #aaa; }
+  button {
+    width:100%; background:#1a1a30; color:#a8c8ff; border:1px solid #334;
+    padding:7px; cursor:pointer; font-family:inherit; font-size:0.78rem;
+    letter-spacing:0.08em; margin-top:8px;
+  }
+  button:hover { background:#252545; }
+  .xt-label { font-size:0.72rem; color:#556; margin-top:6px; text-align:center; }
+</style>
+</head>
+<body>
+<h1>Task 08 — Harmonic Oscillator Phase Space</h1>
+<p class="subtitle">mẍ + kx = 0 &nbsp;|&nbsp; x(t) = C cos(ω₀t + φ)</p>
+<div class="layout">
+  <div>
+    <canvas id="cvT" width="480" height="200"></canvas>
+    <p class="xt-label">x(t) and v(t) over time</p>
+    <canvas id="cvP" width="480" height="280" style="margin-top:10px;"></canvas>
+    <p class="xt-label">Phase portrait (x, ẋ)</p>
+  </div>
+  <div class="ctrl">
+    <h2>PARAMETERS</h2>
+    <label>m (mass)<span class="val" id="dM">1.0 kg</span></label>
+    <input type="range" id="slM" min="0.2" max="3" step="0.1" value="1">
+    <label>k (stiffness)<span class="val" id="dK">1.0 N/m</span></label>
+    <input type="range" id="slK" min="0.1" max="5" step="0.1" value="1">
+    <label>x(0) = A<span class="val" id="dA">2.0 m</span></label>
+    <input type="range" id="slA" min="0.2" max="4" step="0.1" value="2">
+    <label>ẋ(0) = B<span class="val" id="dB">0.0 m/s</span></label>
+    <input type="range" id="slB" min="-4" max="4" step="0.2" value="0">
+    <h2 style="margin-top:12px;">RESULTS</h2>
+    <div class="result">
+      <div>ω₀ = √(k/m) = <span class="val" id="rW">–</span></div>
+      <div>T = 2π/ω₀ = <span class="val" id="rT">–</span></div>
+      <div>C (amplitude) = <span class="val" id="rC">–</span></div>
+      <div>E = ½kC² = <span class="val" id="rE">–</span></div>
+    </div>
+    <button id="btnAddOrbit">+ Add orbit</button>
+    <button id="btnClear">Clear orbits</button>
+  </div>
+</div>
+
+<script>
+const cvT=document.getElementById('cvT'), cvP=document.getElementById('cvP');
+const ctxT=cvT.getContext('2d'), ctxP=cvP.getContext('2d');
+const WT=480,HT=200,WP=480,HP=280;
+const padT={l:48,r:16,t:24,b:34}, padP={l:48,r:16,t:24,b:40};
+let orbits=[];
+
+function getParams(){
+  const m=parseFloat(document.getElementById('slM').value);
+  const k=parseFloat(document.getElementById('slK').value);
+  const A=parseFloat(document.getElementById('slA').value);
+  const B=parseFloat(document.getElementById('slB').value);
+  return {m,k,A,B};
+}
+
+function computeOrbit(m,k,A,B){
+  const w0=Math.sqrt(k/m);
+  const C=Math.sqrt(A*A+(B/w0)**2);
+  const phi=Math.atan2(-B/w0, A);
+  const T=2*Math.PI/w0;
+  const N=400, pts=[];
+  for(let i=0;i<=N;i++){
+    const t=3*T*i/N;
+    const x=C*Math.cos(w0*t+phi);
+    const v=-C*w0*Math.sin(w0*t+phi);
+    pts.push({t,x,v});
+  }
+  return {pts,w0,C,T,E:0.5*k*C*C};
+}
+
+const colors=['#ff6655','#55aaff','#55ffaa','#ffcc33','#cc88ff','#ff88aa'];
+let colorIdx=0;
+
+function drawAxes2(ctx,W,H,pad,xLabel,yLabel,xMin,xMax,yMin,yMax){
+  ctx.clearRect(0,0,W,H);
+  const pw=W-pad.l-pad.r, ph=H-pad.t-pad.b;
+  function cx(x){return pad.l+(x-xMin)/(xMax-xMin)*pw;}
+  function cy(y){return pad.t+(yMax-y)/(yMax-yMin)*ph;}
+  ctx.strokeStyle='#161625'; ctx.lineWidth=1;
+  for(let i=0;i<=8;i++){const x=pad.l+i*pw/8;ctx.beginPath();ctx.moveTo(x,pad.t);ctx.lineTo(x,H-pad.b);ctx.stroke();}
+  for(let i=0;i<=5;i++){const y=pad.t+i*ph/5;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();}
+  ctx.strokeStyle='#2a2a4a'; ctx.lineWidth=1.5;
+  // x-axis
+  if(yMin<=0&&yMax>=0){
+    ctx.beginPath();ctx.moveTo(pad.l,cy(0));ctx.lineTo(W-pad.r,cy(0));ctx.stroke();
+  }
+  ctx.beginPath();ctx.moveTo(pad.l,pad.t);ctx.lineTo(pad.l,H-pad.b);ctx.stroke();
+  ctx.fillStyle='#445'; ctx.font='10px Courier New'; ctx.textAlign='center';
+  ctx.fillText(xLabel,pad.l+pw/2,H-4);
+  ctx.save();ctx.translate(12,pad.t+ph/2);ctx.rotate(-Math.PI/2);ctx.fillText(yLabel,0,0);ctx.restore();
+  return {cx,cy};
+}
+
+function draw(){
+  const {m,k,A,B}=getParams();
+  const w0=Math.sqrt(k/m);
+  const cur=computeOrbit(m,k,A,B);
+
+  document.getElementById('dM').textContent=m.toFixed(1)+' kg';
+  document.getElementById('dK').textContent=k.toFixed(1)+' N/m';
+  document.getElementById('dA').textContent=A.toFixed(1)+' m';
+  document.getElementById('dB').textContent=B.toFixed(1)+' m/s';
+  document.getElementById('rW').textContent=w0.toFixed(4)+' rad/s';
+  document.getElementById('rT').textContent=cur.T.toFixed(4)+' s';
+  document.getElementById('rC').textContent=cur.C.toFixed(4)+' m';
+  document.getElementById('rE').textContent=cur.E.toFixed(4)+' J';
+
+  const tMax=cur.pts[cur.pts.length-1].t;
+  const allC=[cur.C,...orbits.map(o=>o.C)];
+  const cMax=Math.max(...allC)*1.2;
+  const vMax=Math.max(...allC.map(c=>c*w0))*1.2;
+
+  // Time plot
+  const {cx:ctX,cy:ctY}=drawAxes2(ctxT,WT,HT,padT,'t [s]','x, v',0,tMax,-Math.max(cur.C*w0,cur.C)*1.3,Math.max(cur.C*w0,cur.C)*1.3);
+  // Draw saved orbits (faded)
+  orbits.forEach(o=>{
+    ctxT.beginPath();
+    o.pts.forEach((p,i)=>{const cx=ctX(p.t),cy=ctY(p.x);i===0?ctxT.moveTo(cx,cy):ctxT.lineTo(cx,cy);});
+    ctxT.strokeStyle=o.color+'55'; ctxT.lineWidth=1.2; ctxT.stroke();
+  });
+  // Current x(t)
+  ctxT.beginPath();
+  cur.pts.forEach((p,i)=>{const cx=ctX(p.t),cy=ctY(p.x);i===0?ctxT.moveTo(cx,cy):ctxT.lineTo(cx,cy);});
+  ctxT.strokeStyle='#ff6655'; ctxT.lineWidth=2; ctxT.stroke();
+  // Current v(t)
+  ctxT.beginPath();
+  cur.pts.forEach((p,i)=>{const cx=ctX(p.t),cy=ctY(p.v);i===0?ctxT.moveTo(cx,cy):ctxT.lineTo(cx,cy);});
+  ctxT.strokeStyle='#55aaff'; ctxT.lineWidth=2; ctxT.stroke();
+  // Legend
+  ctxT.fillStyle='#ff6655'; ctxT.font='11px Courier New'; ctxT.textAlign='left'; ctxT.fillText('x(t)',padT.l+4,padT.t+14);
+  ctxT.fillStyle='#55aaff'; ctxT.fillText('ẋ(t)',padT.l+40,padT.t+14);
+
+  // Phase portrait
+  const phXmax=cMax+0.5, phVmax=Math.max(...allC.map(c=>c*Math.sqrt(k/m)))*1.2+0.5;
+  const {cx:cpX,cy:cpY}=drawAxes2(ctxP,WP,HP,padP,'x [m]','ẋ [m/s]',-phXmax,phXmax,-phVmax,phVmax);
+  // Saved orbits
+  orbits.forEach(o=>{
+    ctxP.beginPath();
+    o.pts.forEach((p,i)=>{const cx=cpX(p.x),cy=cpY(p.v);i===0?ctxP.moveTo(cx,cy):ctxP.lineTo(cx,cy);});
+    ctxP.strokeStyle=o.color; ctxP.lineWidth=1.5; ctxP.stroke();
+  });
+  // Current orbit
+  ctxP.beginPath();
+  cur.pts.forEach((p,i)=>{const cx=cpX(p.x),cy=cpY(p.v);i===0?ctxP.moveTo(cx,cy):ctxP.lineTo(cx,cy);});
+  ctxP.strokeStyle='#ffd97d'; ctxP.lineWidth=2.5; ctxP.stroke();
+  // Current point at t=0
+  ctxP.beginPath(); ctxP.arc(cpX(A),cpY(B),6,0,Math.PI*2);
+  ctxP.fillStyle='#ffd97d'; ctxP.fill();
+  // Ellipse equation label
+  ctxP.fillStyle='#445'; ctxP.font='10px Courier New'; ctxP.textAlign='center';
+  ctxP.fillText(`x²/C² + ẋ²/(Cω₀)² = 1   (E = ${cur.E.toFixed(2)} J)`, WP/2, HP-6);
+}
+
+document.getElementById('btnAddOrbit').addEventListener('click',()=>{
+  const {m,k,A,B}=getParams();
+  const orb=computeOrbit(m,k,A,B);
+  orb.color=colors[colorIdx%colors.length]; colorIdx++;
+  orbits.push(orb); draw();
+});
+document.getElementById('btnClear').addEventListener('click',()=>{orbits=[];draw();});
+['slM','slK','slA','slB'].forEach(id=>document.getElementById(id).addEventListener('input',draw));
+draw();
+</script>
+</body>
+</html>

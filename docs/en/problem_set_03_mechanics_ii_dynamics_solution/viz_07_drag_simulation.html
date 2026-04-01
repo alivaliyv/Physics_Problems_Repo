@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Task 07 – Vertical Throw with Drag</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0d0d14; color: #e8e4d8;
+    font-family: 'Courier New', monospace;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 24px 16px; min-height: 100vh;
+  }
+  h1 { font-size: 1.05rem; letter-spacing: 0.12em; color: #a8c8ff; margin-bottom: 4px; text-transform: uppercase; }
+  .subtitle { font-size: 0.78rem; color: #667; margin-bottom: 20px; }
+  .layout { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; align-items: flex-start; }
+  canvas { border: 1px solid #222; background: #070711; display: block; }
+  .ctrl { background: #11111e; border: 1px solid #222; padding: 16px; width: 230px; font-size: 0.77rem; }
+  .ctrl h2 { font-size: 0.78rem; color: #a8c8ff; letter-spacing: 0.1em; margin-bottom: 10px; border-bottom: 1px solid #222; padding-bottom:5px; }
+  label { display: flex; justify-content: space-between; color: #889; margin-bottom: 4px; }
+  input[type=range] { width: 100%; accent-color: #4af; margin-bottom: 10px; }
+  .val { color: #ffd97d; }
+  .result { font-size: 0.74rem; line-height: 2; color: #aaa; }
+  .legend { display: flex; flex-direction: column; gap: 5px; margin-top: 10px; font-size: 0.73rem; }
+  .leg { display: flex; align-items: center; gap: 8px; }
+  .ls { width: 20px; height: 3px; border-radius: 1px; }
+</style>
+</head>
+<body>
+<h1>Task 07 — Vertical Throw with Drag</h1>
+<p class="subtitle">mẋ = –mg – kv &nbsp;|&nbsp; Analytical vs. Euler-Numerical</p>
+<div class="layout">
+  <div>
+    <canvas id="cvX" width="500" height="220"></canvas>
+    <canvas id="cvV" width="500" height="220" style="margin-top:10px;"></canvas>
+  </div>
+  <div class="ctrl">
+    <h2>PARAMETERS</h2>
+    <label>v₀ (initial velocity)<span class="val" id="dV0">15 m/s</span></label>
+    <input type="range" id="slV0" min="1" max="40" step="1" value="15">
+    <label>k (drag coeff.)<span class="val" id="dK">0.5</span></label>
+    <input type="range" id="slK" min="0.01" max="3" step="0.05" value="0.5">
+    <label>m (mass)<span class="val" id="dM">1.0 kg</span></label>
+    <input type="range" id="slM" min="0.2" max="5" step="0.1" value="1">
+    <h2 style="margin-top:12px;">RESULTS</h2>
+    <div class="result">
+      <div>τ = m/k = <span class="val" id="rTau">–</span></div>
+      <div>v_T = mg/k = <span class="val" id="rVT">–</span></div>
+      <div>t* (drag) = <span class="val" id="rTstar">–</span></div>
+      <div>x_max (drag) = <span class="val" id="rXmax">–</span></div>
+      <div>t* (no drag) = <span class="val" id="rT0">–</span></div>
+      <div>x_max (free) = <span class="val" id="rX0">–</span></div>
+      <div>Δx = <span class="val" id="rDx">–</span></div>
+    </div>
+    <div class="legend">
+      <div class="leg"><div class="ls" style="background:#ff6655"></div>x(t) — analytical</div>
+      <div class="leg"><div class="ls" style="background:#ffcc33; border-top:1px dashed #ffcc33; background:transparent; border:none; border-top: 2px dashed #ffcc33;"></div>x(t) — Euler numerical</div>
+      <div class="leg"><div class="ls" style="background:#55aaff"></div>v(t) — analytical</div>
+      <div class="leg"><div class="ls" style="background:#55ffaa"></div>Free throw (no drag)</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const g = 9.81;
+const cvX = document.getElementById('cvX'), cvV = document.getElementById('cvV');
+const ctxX = cvX.getContext('2d'), ctxV = cvV.getContext('2d');
+const W=500,H=220;
+const pad={l:52,r:20,t:28,b:34};
+const pw=W-pad.l-pad.r, ph=H-pad.t-pad.b;
+
+function analytical(t,v0,k,m){
+  const tau=m/k, vT=m*g/k;
+  const v=-vT+(v0+vT)*Math.exp(-t/tau);
+  const x=-vT*t+(m/k)*(v0+vT)*(1-Math.exp(-t/tau));
+  return {v,x};
+}
+function freeThrow(t,v0){
+  return {v:v0-g*t, x:v0*t-0.5*g*t*t};
+}
+function eulerSim(v0,k,m,dt,Tend){
+  let v=v0,x=0,t=0;
+  const pts=[];
+  while(t<=Tend){pts.push({t,x,v});v+=(-g-k*v/m)*dt;x+=v*dt;t+=dt;}
+  return pts;
+}
+
+function toCanvasX(t,tMax){return pad.l+t/tMax*pw;}
+function toCanvasY(y,yMin,yMax){return pad.t+(yMax-y)/(yMax-yMin)*ph;}
+
+function drawGraph(ctx,title,dataLines,xlabel,ylabel){
+  ctx.clearRect(0,0,W,H);
+  // Background grid
+  ctx.strokeStyle='#161625'; ctx.lineWidth=1;
+  for(let i=0;i<=8;i++){const x=pad.l+i*pw/8; ctx.beginPath();ctx.moveTo(x,pad.t);ctx.lineTo(x,H-pad.b);ctx.stroke();}
+  for(let i=0;i<=4;i++){const y=pad.t+i*ph/4; ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();}
+  // Axes
+  ctx.strokeStyle='#2a2a4a'; ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(pad.l,pad.t);ctx.lineTo(pad.l,H-pad.b);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(pad.l,H-pad.b);ctx.lineTo(W-pad.r,H-pad.b);ctx.stroke();
+  // y=0 line
+  ctx.strokeStyle='#2a2a4a'; ctx.lineWidth=1;
+  const y0=dataLines[0].yMin,yM=dataLines[0].yMax;
+  if(y0<0&&yM>0){
+    const cy0=toCanvasY(0,y0,yM);
+    ctx.setLineDash([3,4]);ctx.beginPath();ctx.moveTo(pad.l,cy0);ctx.lineTo(W-pad.r,cy0);ctx.stroke();ctx.setLineDash([]);
+  }
+  // Draw each line
+  dataLines.forEach(dl=>{
+    ctx.beginPath();
+    dl.pts.forEach((p,i)=>{
+      const cx=toCanvasX(p.t,dl.tMax), cy=toCanvasY(p.y,dl.yMin,dl.yMax);
+      i===0?ctx.moveTo(cx,cy):ctx.lineTo(cx,cy);
+    });
+    ctx.strokeStyle=dl.color; ctx.lineWidth=dl.width||2;
+    if(dl.dash){ctx.setLineDash(dl.dash);} ctx.stroke(); ctx.setLineDash([]);
+  });
+  // Labels
+  ctx.fillStyle='#a8c8ff'; ctx.font='11px Courier New'; ctx.textAlign='left';
+  ctx.fillText(title, pad.l+6, pad.t+14);
+  ctx.fillStyle='#556'; ctx.textAlign='center';
+  ctx.fillText(xlabel, pad.l+pw/2, H-4);
+  ctx.save(); ctx.translate(13, pad.t+ph/2); ctx.rotate(-Math.PI/2);
+  ctx.fillText(ylabel,0,0); ctx.restore();
+}
+
+function run(){
+  const v0=parseFloat(document.getElementById('slV0').value);
+  const k=parseFloat(document.getElementById('slK').value);
+  const m=parseFloat(document.getElementById('slM').value);
+  document.getElementById('dV0').textContent=v0+' m/s';
+  document.getElementById('dK').textContent=k.toFixed(2);
+  document.getElementById('dM').textContent=m.toFixed(1)+' kg';
+
+  const tau=m/k, vT=m*g/k;
+  const tStar=tau*Math.log(1+v0/vT);
+  const xMax=analytical(tStar,v0,k,m).x;
+  const tFall=tStar+5; // extra descent time
+  const Tend=tFall*2;
+  const t0free=v0/g, x0free=v0*v0/(2*g);
+
+  document.getElementById('rTau').textContent=tau.toFixed(3)+' s';
+  document.getElementById('rVT').textContent=(-vT).toFixed(2)+' m/s';
+  document.getElementById('rTstar').textContent=tStar.toFixed(3)+' s';
+  document.getElementById('rXmax').textContent=xMax.toFixed(3)+' m';
+  document.getElementById('rT0').textContent=t0free.toFixed(3)+' s';
+  document.getElementById('rX0').textContent=x0free.toFixed(3)+' m';
+  document.getElementById('rDx').textContent=(x0free-xMax).toFixed(3)+' m';
+
+  const N=300;
+  const xPtsAn=[],vPtsAn=[],xPts0=[],vPts0=[];
+  let xMin_x=0,xMax_x=xMax*1.1;
+  let vMin_v=-vT*1.2,vMax_v=v0*1.1;
+
+  for(let i=0;i<=N;i++){
+    const t=Tend*i/N;
+    const an=analytical(t,v0,k,m);
+    const fr=freeThrow(t,v0);
+    xPtsAn.push({t,y:an.x});
+    vPtsAn.push({t,y:an.v});
+    xPts0.push({t,y:Math.max(fr.x,-0.5)});
+    vPts0.push({t,y:fr.v});
+    if(fr.x<xMin_x) xMin_x=fr.x;
+    if(an.x<xMin_x) xMin_x=an.x;
+  }
+
+  const euPts=eulerSim(v0,k,m,Tend/N,Tend);
+  const euXpts=euPts.map(p=>({t:p.t,y:p.x}));
+
+  xMin_x=Math.min(xMin_x,-1);
+
+  const xLines=[
+    {pts:xPtsAn,color:'#ff6655',width:2.5,tMax:Tend,yMin:xMin_x,yMax:xMax_x},
+    {pts:euXpts,color:'#ffcc33',width:1.5,dash:[5,4],tMax:Tend,yMin:xMin_x,yMax:xMax_x},
+    {pts:xPts0,color:'#55ffaa',width:1.5,tMax:Tend,yMin:xMin_x,yMax:xMax_x},
+  ];
+  const vLines=[
+    {pts:vPtsAn,color:'#55aaff',width:2.5,tMax:Tend,yMin:vMin_v,yMax:vMax_v},
+    {pts:vPts0,color:'#55ffaa',width:1.5,tMax:Tend,yMin:vMin_v,yMax:vMax_v},
+  ];
+
+  drawGraph(ctxX,'x(t) — position','x(t) — position','t [s]','x [m]');
+  drawGraph(ctxX,'x(t)',xLines,'t [s]','x [m]');
+  drawGraph(ctxV,'v(t)',vLines,'t [s]','v [m/s]');
+}
+
+['slV0','slK','slM'].forEach(id=>document.getElementById(id).addEventListener('input',run));
+run();
+</script>
+</body>
+</html>

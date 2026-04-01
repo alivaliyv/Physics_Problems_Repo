@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Task 09 – 2D Isotropic Harmonic Potential</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0a0a12; color: #e8e4d8;
+    font-family: 'Courier New', monospace;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 24px 16px; min-height: 100vh;
+  }
+  h1 { font-size: 1.05rem; letter-spacing: 0.12em; color: #a8c8ff; margin-bottom: 4px; text-transform: uppercase; }
+  .subtitle { font-size: 0.78rem; color: #667; margin-bottom: 18px; text-align: center; }
+  .layout { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; align-items: flex-start; }
+  canvas { border: 1px solid #222; display: block; cursor: crosshair; }
+  .ctrl { background: #11111e; border: 1px solid #222; padding: 16px; width: 230px; font-size: 0.77rem; }
+  .ctrl h2 { font-size: 0.78rem; color: #a8c8ff; letter-spacing: 0.1em; margin-bottom: 10px; border-bottom: 1px solid #222; padding-bottom: 5px; }
+  label { display: flex; justify-content: space-between; color: #889; margin-bottom: 4px; }
+  input[type=range] { width: 100%; accent-color: #4af; margin-bottom: 10px; }
+  .val { color: #ffd97d; }
+  .result { font-size: 0.74rem; line-height: 2.0; color: #aaa; }
+  button { width:100%; background:#1a1a30; color:#a8c8ff; border:1px solid #334; padding:7px; cursor:pointer; font-family:inherit; font-size:0.77rem; margin-top:6px; }
+  button:hover { background:#252545; }
+  .tip { font-size:0.71rem; color:#556; margin-top:8px; line-height:1.6; }
+  .legend { margin-top:10px; font-size:0.72rem; line-height:1.9; }
+  .leg { display:flex; align-items:center; gap:7px; }
+  .ls { width:16px; height:3px; border-radius:1px; }
+</style>
+</head>
+<body>
+<h1>Task 09 — 2D Isotropic Harmonic Potential</h1>
+<p class="subtitle">U(x,y) = k/2·(x²+y²) &nbsp;|&nbsp; F⃗ = –k·r⃗ &nbsp;|&nbsp; Click to launch a particle</p>
+<div class="layout">
+  <canvas id="cv" width="500" height="500"></canvas>
+  <div class="ctrl">
+    <h2>PARAMETERS</h2>
+    <label>k (spring const.)<span class="val" id="dK">1.0</span></label>
+    <input type="range" id="slK" min="0.1" max="5" step="0.1" value="1">
+    <label>m (mass)<span class="val" id="dM">1.0 kg</span></label>
+    <input type="range" id="slM" min="0.2" max="3" step="0.1" value="1">
+    <label>ẋ(0) = vx₀<span class="val" id="dVX">0.0</span></label>
+    <input type="range" id="slVX" min="-4" max="4" step="0.2" value="0">
+    <label>ẏ(0) = vy₀<span class="val" id="dVY">2.0</span></label>
+    <input type="range" id="slVY" min="-4" max="4" step="0.2" value="2">
+    <button id="btnLaunch">▶ Launch from center</button>
+    <button id="btnClear">Clear all</button>
+    <h2 style="margin-top:12px;">CURRENT STATE</h2>
+    <div class="result">
+      <div>ω₀ = √(k/m) = <span class="val" id="rW">–</span></div>
+      <div>T = 2π/ω₀ = <span class="val" id="rT">–</span></div>
+      <div>E (last) = <span class="val" id="rE">–</span></div>
+      <div>type = <span class="val" id="rType">–</span></div>
+    </div>
+    <div class="legend">
+      <div class="leg"><div class="ls" style="background:#55aaff"></div>Particle trajectory</div>
+      <div class="leg"><div class="ls" style="background:#ff6655"></div>Force vectors F⃗</div>
+      <div class="leg" style="color:#445;">Contours: equipotential U=const</div>
+    </div>
+    <p class="tip">Click anywhere on the canvas to spawn a particle at that position with the chosen initial velocity.</p>
+  </div>
+</div>
+
+<script>
+const cv=document.getElementById('cv');
+const ctx=cv.getContext('2d');
+const W=500,H=500;
+const RANGE=5; // ±5 in world units
+const CX=W/2, CY=H/2, SCALE=W/(2*RANGE);
+function toScreen(x,y){return{x:CX+x*SCALE,y:CY-y*SCALE};}
+function toWorld(sx,sy){return{x:(sx-CX)/SCALE,y:-(sy-CY)/SCALE};}
+
+let particles=[];
+let animId=null;
+
+function getParams(){
+  const k=parseFloat(document.getElementById('slK').value);
+  const m=parseFloat(document.getElementById('slM').value);
+  const vx=parseFloat(document.getElementById('slVX').value);
+  const vy=parseFloat(document.getElementById('slVY').value);
+  return{k,m,vx,vy};
+}
+
+function updateLabels(k,m){
+  const w0=Math.sqrt(k/m);
+  document.getElementById('dK').textContent=k.toFixed(1);
+  document.getElementById('dM').textContent=m.toFixed(1)+' kg';
+  document.getElementById('dVX').textContent=parseFloat(document.getElementById('slVX').value).toFixed(1);
+  document.getElementById('dVY').textContent=parseFloat(document.getElementById('slVY').value).toFixed(1);
+  document.getElementById('rW').textContent=w0.toFixed(4)+' rad/s';
+  document.getElementById('rT').textContent=(2*Math.PI/w0).toFixed(4)+' s';
+}
+
+function spawnParticle(wx,wy,vx,vy,k,m){
+  const color=`hsl(${Math.random()*360},75%,65%)`;
+  particles.push({x:wx,y:wy,vx,vy,k,m,trail:[{x:wx,y:wy}],color,alive:true});
+  const E=0.5*m*(vx*vx+vy*vy)+0.5*k*(wx*wx+wy*wy);
+  const C=Math.sqrt(wx*wx+(vy/Math.sqrt(k/m))**2+wy*wy+(vx/Math.sqrt(k/m))**2);
+  const isCircle=Math.abs(Math.abs(vx)-Math.abs(vy*Math.sqrt(m/k)))<0.05 && Math.abs(wx-0)<0.05;
+  const w0=Math.sqrt(k/m);
+  document.getElementById('rE').textContent=E.toFixed(3)+' J';
+  document.getElementById('rType').textContent='ellipse';
+}
+
+const DT=0.016;
+function stepParticle(p){
+  const ax=-p.k/p.m*p.x;
+  const ay=-p.k/p.m*p.y;
+  p.vx+=ax*DT; p.vy+=ay*DT;
+  p.x+=p.vx*DT; p.y+=p.vy*DT;
+  p.trail.push({x:p.x,y:p.y});
+  if(p.trail.length>800) p.trail.shift();
+}
+
+function drawBackground(k){
+  // Potential heat map
+  const idata=ctx.createImageData(W,H);
+  for(let py=0;py<H;py++){
+    for(let px=0;px<W;px++){
+      const wx=(px-CX)/SCALE, wy=-(py-CY)/SCALE;
+      const U=0.5*k*(wx*wx+wy*wy);
+      const Umax=0.5*k*RANGE*RANGE;
+      const t=Math.min(U/Umax,1);
+      const r=Math.floor(8+t*30);
+      const g=Math.floor(8+t*18);
+      const b=Math.floor(20+t*60);
+      const i=(py*W+px)*4;
+      idata.data[i]=r; idata.data[i+1]=g; idata.data[i+2]=b; idata.data[i+3]=255;
+    }
+  }
+  ctx.putImageData(idata,0,0);
+
+  // Equipotential circles
+  ctx.strokeStyle='rgba(80,120,200,0.3)'; ctx.lineWidth=1;
+  for(let U=0.5;U<=RANGE*RANGE*k/2;U+=0.5*k){
+    const r=Math.sqrt(2*U/k)*SCALE;
+    ctx.beginPath(); ctx.arc(CX,CY,r,0,Math.PI*2); ctx.stroke();
+  }
+
+  // Force vectors on a grid
+  const gstep=1.5;
+  for(let gx=-RANGE;gx<=RANGE;gx+=gstep){
+    for(let gy=-RANGE;gy<=RANGE;gy+=gstep){
+      const Fx=-k*gx, Fy=-k*gy;
+      const len=Math.sqrt(Fx*Fx+Fy*Fy);
+      if(len<0.01) continue;
+      const sc=18;
+      const p=toScreen(gx,gy);
+      const dx=Fx/len*sc, dy=-Fy/len*sc;
+      ctx.strokeStyle='rgba(255,80,60,0.4)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(p.x+dx,p.y+dy); ctx.stroke();
+      ctx.fillStyle='rgba(255,80,60,0.4)';
+      const ang=Math.atan2(dy,dx);
+      ctx.beginPath(); ctx.moveTo(p.x+dx,p.y+dy);
+      ctx.lineTo(p.x+dx-5*Math.cos(ang-0.5),p.y+dy-5*Math.sin(ang-0.5));
+      ctx.lineTo(p.x+dx-5*Math.cos(ang+0.5),p.y+dy-5*Math.sin(ang+0.5));
+      ctx.closePath(); ctx.fill();
+    }
+  }
+
+  // Axes
+  ctx.strokeStyle='rgba(80,100,160,0.5)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(pad=0,CY); ctx.lineTo(W,CY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(CX,0); ctx.lineTo(CX,H); ctx.stroke();
+  ctx.fillStyle='#334'; ctx.font='10px Courier New'; ctx.textAlign='center';
+  for(let i=-4;i<=4;i+=2){if(i!==0){ctx.fillText(i,CX+i*SCALE,CY+14);ctx.fillText(-i,CX-4,CY-i*SCALE+4);}}
+  ctx.fillStyle='#445'; ctx.fillText('x',W-20,CY-6); ctx.fillText('y',CX+8,14);
+}
+
+let pad=0; // just to avoid variable collision with fn above
+
+function drawScene(){
+  const {k,m}=getParams();
+  drawBackground(k);
+  // Trajectories
+  particles.forEach(p=>{
+    if(p.trail.length<2) return;
+    ctx.beginPath();
+    p.trail.forEach((pt,i)=>{
+      const s=toScreen(pt.x,pt.y);
+      i===0?ctx.moveTo(s.x,s.y):ctx.lineTo(s.x,s.y);
+    });
+    ctx.strokeStyle=p.color+'aa'; ctx.lineWidth=1.5; ctx.stroke();
+    // Current position
+    const cur=toScreen(p.x,p.y);
+    ctx.beginPath(); ctx.arc(cur.x,cur.y,5,0,Math.PI*2);
+    ctx.fillStyle=p.color; ctx.fill();
+    // Velocity arrow
+    const vs=toScreen(p.x+p.vx*0.3,p.y+p.vy*0.3);
+    ctx.strokeStyle=p.color; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(cur.x,cur.y); ctx.lineTo(vs.x,vs.y); ctx.stroke();
+  });
+  // Origin dot
+  ctx.beginPath(); ctx.arc(CX,CY,4,0,Math.PI*2);
+  ctx.fillStyle='#ffee88'; ctx.fill();
+}
+
+function loop(){
+  const {k,m}=getParams();
+  particles.forEach(p=>{p.k=k;p.m=m;stepParticle(p);});
+  drawScene();
+  updateLabels(k,m);
+  animId=requestAnimationFrame(loop);
+}
+
+cv.addEventListener('click',e=>{
+  const rect=cv.getBoundingClientRect();
+  const sx=e.clientX-rect.left, sy=e.clientY-rect.top;
+  const w=toWorld(sx,sy);
+  const {k,m,vx,vy}=getParams();
+  spawnParticle(w.x,w.y,vx,vy,k,m);
+});
+
+document.getElementById('btnLaunch').addEventListener('click',()=>{
+  const {k,m,vx,vy}=getParams();
+  spawnParticle(0,0,vx,vy,k,m);
+});
+document.getElementById('btnClear').addEventListener('click',()=>{particles=[];});
+['slK','slM','slVX','slVY'].forEach(id=>document.getElementById(id).addEventListener('input',()=>updateLabels(...[parseFloat(document.getElementById('slK').value),parseFloat(document.getElementById('slM').value)])));
+
+loop();
+</script>
+</body>
+</html>
