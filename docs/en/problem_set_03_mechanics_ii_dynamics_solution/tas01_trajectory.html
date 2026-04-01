@@ -1,14 +1,58 @@
 <!DOCTYPE html>
 <html>
+<head>
+<meta charset="UTF-8">
+<title>Trajectory</title>
+<style>
+body { background:#111; color:#eee; text-align:center; font-family:sans-serif; }
+canvas { background:#000; border:1px solid #444; }
+</style>
+</head>
 <body>
-<canvas id="c"></canvas>
+
+<h2>Trajectory under Constant Force</h2>
+<canvas id="c" width="600" height="400"></canvas>
+
 <script>
-let ctx = c.getContext("2d");
-for(let t=0; t<5; t+=0.01){
-  let x = t + 1.5*t*t;
-  let y = -t + 0.5*t*t;
-  ctx.fillRect(x*10+50, 200-y*10, 1, 1);
+const canvas = document.getElementById("c");
+const ctx = canvas.getContext("2d");
+
+function drawAxes(){
+  ctx.strokeStyle="#555";
+  ctx.beginPath();
+  ctx.moveTo(0,200); ctx.lineTo(600,200);
+  ctx.moveTo(300,0); ctx.lineTo(300,400);
+  ctx.stroke();
 }
+
+let t = 0;
+
+function step(){
+  ctx.clearRect(0,0,600,400);
+  drawAxes();
+
+  ctx.strokeStyle="cyan";
+  ctx.beginPath();
+
+  for(let tt=0; tt<=t; tt+=0.02){
+    let x = tt + 1.5*tt*tt;
+    let y = -tt + 0.5*tt*tt;
+
+    let px = 300 + x*20;
+    let py = 200 - y*20;
+
+    if(tt===0) ctx.moveTo(px,py);
+    else ctx.lineTo(px,py);
+  }
+
+  ctx.stroke();
+  t += 0.02;
+
+  requestAnimationFrame(step);
+}
+
+step();
 </script>
+
 </body>
 </html>
