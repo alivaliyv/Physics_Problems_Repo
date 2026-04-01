@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<body>
+<canvas id="c"></canvas>
+<script>
+let ctx = c.getContext("2d");
+for(let t=0; t<5; t+=0.01){
+  let x = t + 1.5*t*t;
+  let y = -t + 0.5*t*t;
+  ctx.fillRect(x*10+50, 200-y*10, 1, 1);
+}
+</script>
+</body>
+</html>
