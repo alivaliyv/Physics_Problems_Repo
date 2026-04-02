@@ -6,7 +6,7 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    background: #0a0a12; color: #e8e4d8;
+    background: #969696; color: #e8e4d8;
     font-family: 'Courier New', monospace;
     display: flex; flex-direction: column; align-items: center;
     padding: 24px 16px; min-height: 100vh;
@@ -107,8 +107,11 @@ const DT=0.016;
 function stepParticle(p){
   const ax=-p.k/p.m*p.x;
   const ay=-p.k/p.m*p.y;
-  p.vx+=ax*DT; p.vy+=ay*DT;
-  p.x+=p.vx*DT; p.y+=p.vy*DT;
+  p.x += p.vx * DT + 0.5 * ax * DT * DT;
+  const ax_new = -p.k/p.m * p.x;
+  p.vx += 0.5 * (ax + ax_new) * DT;
+  p.vy+=ay*DT;
+  p.y+=p.vy*DT;
   p.trail.push({x:p.x,y:p.y});
   if(p.trail.length>800) p.trail.shift();
 }
