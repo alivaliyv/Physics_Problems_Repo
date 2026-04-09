@@ -1,93 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Task 01 – Trajectory under Constant Force</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: #0d0d14;
-    color: #e8e4d8;
-    font-family: 'Courier New', monospace;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 24px 16px;
-    min-height: 100vh;
-  }
-  h1 { font-size: 1.1rem; letter-spacing: 0.12em; color: #a8c8ff; margin-bottom: 4px; text-transform: uppercase; }
-  .subtitle { font-size: 0.78rem; color: #667; margin-bottom: 24px; }
-  .layout { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; }
-  canvas { border: 1px solid #222; background: #070711; display: block; }
-  .panel {
-    background: #11111e;
-    border: 1px solid #222;
-    padding: 16px;
-    width: 260px;
-    font-size: 0.78rem;
-    line-height: 1.9;
-  }
-  .panel h2 { font-size: 0.8rem; color: #a8c8ff; letter-spacing: 0.1em; margin-bottom: 10px; border-bottom: 1px solid #222; padding-bottom: 6px; }
-  .val { color: #ffd97d; }
-  .label { color: #778; }
-  .controls { display: flex; gap: 10px; margin-top: 16px; }
-  button {
-    background: #1a1a30;
-    color: #a8c8ff;
-    border: 1px solid #334;
-    padding: 7px 18px;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: 0.78rem;
-    letter-spacing: 0.08em;
-    transition: background 0.15s;
-  }
-  button:hover { background: #252545; }
-  .legend { display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap; }
-  .leg-item { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: #889; }
-  .leg-dot { width: 10px; height: 3px; border-radius: 2px; }
-</style>
-</head>
-<body>
-<h1>Task 01 — Trajectory under Constant Force</h1>
-<p class="subtitle">m = 2 kg &nbsp;|&nbsp; F = (6, 2) N &nbsp;|&nbsp; v₀ = (1, –1) m/s</p>
-<div class="layout">
-  <div>
-    <canvas id="cv" width="500" height="420"></canvas>
-    <div class="legend">
-      <div class="leg-item"><div class="leg-dot" style="background:#4af"></div> Trajectory</div>
-      <div class="leg-item"><div class="leg-dot" style="background:#fa4; width:4px; height:10px; border-radius:1px;"></div> Body</div>
-      <div class="leg-item"><div class="leg-dot" style="background:#f64; width:10px;"></div> Force vector</div>
-      <div class="leg-item"><div class="leg-dot" style="background:#5d5; width:10px;"></div> Velocity vector</div>
-    </div>
-    <div class="controls">
-      <button id="btnPlay">▶ PLAY</button>
-      <button id="btnReset">↺ RESET</button>
-    </div>
-  </div>
-  <div class="panel">
-    <h2>PARAMETERS</h2>
-    <div><span class="label">mass m</span> <span class="val">2 kg</span></div>
-    <div><span class="label">F</span> <span class="val">(6, 2) N</span></div>
-    <div><span class="label">a = F/m</span> <span class="val">(3, 1) m/s²</span></div>
-    <div><span class="label">v(0)</span> <span class="val">(1, –1) m/s</span></div>
-    <div><span class="label">r(0)</span> <span class="val">(0, 0) m</span></div>
-    <h2 style="margin-top:14px;">LIVE STATE</h2>
-    <div><span class="label">t</span> <span class="val" id="tVal">0.000 s</span></div>
-    <div><span class="label">x</span> <span class="val" id="xVal">0.000 m</span></div>
-    <div><span class="label">y</span> <span class="val" id="yVal">0.000 m</span></div>
-    <div><span class="label">vx</span> <span class="val" id="vxVal">1.000 m/s</span></div>
-    <div><span class="label">vy</span> <span class="val" id="vyVal">–1.000 m/s</span></div>
-    <div><span class="label">|v|</span> <span class="val" id="spVal">1.414 m/s</span></div>
-    <div><span class="label">T (KE)</span> <span class="val" id="keVal">2.000 J</span></div>
-    <div><span class="label">W done</span> <span class="val" id="wVal">0.000 J</span></div>
-    <h2 style="margin-top:14px;">AT t = 3 s</h2>
-    <div><span class="label">r(3)</span> <span class="val">(16.5, 1.5) m</span></div>
-    <div><span class="label">v(3)</span> <span class="val">(10, 2) m/s</span></div>
-    <div><span class="label">W</span> <span class="val">102 J</span></div>
-  </div>
-</div>
-
 <script>
 const cv = document.getElementById('cv');
 const ctx = cv.getContext('2d');
@@ -96,160 +6,151 @@ const W = cv.width, H = cv.height;
 const m = 2, ax = 3, ay = 1, vx0 = 1, vy0 = -1;
 const T_END = 3.0;
 
+// Kinematic functions
 function pos(t) { return { x: vx0*t + 0.5*ax*t*t, y: vy0*t + 0.5*ay*t*t }; }
 function vel(t) { return { x: vx0 + ax*t, y: vy0 + ay*t }; }
 
-// Determine scale: trajectory from t=0..3
+// Scale logic: Calculate bounds based on the full 3s trajectory
 const pts = [];
-for (let i = 0; i <= 300; i++) { const t = i*T_END/300; pts.push(pos(t)); }
-const xs = pts.map(p=>p.x), ys = pts.map(p=>p.y);
-const xMin = Math.min(...xs)-1, xMax = Math.max(...xs)+1;
-const yMin = Math.min(...ys)-1, yMax = Math.max(...ys)+1;
-const pad = 50;
-const scaleX = (W - 2*pad) / (xMax - xMin);
-const scaleY = (H - 2*pad) / (yMax - yMin);
-const scale = Math.min(scaleX, scaleY);
-const cx0 = pad - xMin*scale + (W - 2*pad - (xMax-xMin)*scale)/2;
-const cy0 = H - pad + yMin*scale - (H - 2*pad - (yMax-yMin)*scale)/2;
+for (let i = 0; i <= 100; i++) { pts.push(pos((i/100) * T_END)); }
+const xs = pts.map(p => p.x), ys = pts.map(p => p.y);
+const xMin = Math.min(...xs, 0) - 2, xMax = Math.max(...xs) + 2;
+const yMin = Math.min(...ys, 0) - 2, yMax = Math.max(...ys) + 2;
 
-function toCV(px, py) { return { x: cx0 + px*scale, y: cy0 - py*scale }; }
+const pad = 50;
+const scaleX = (W - 2 * pad) / (xMax - xMin);
+const scaleY = (H - 2 * pad) / (yMax - yMin);
+const scale = Math.min(scaleX, scaleY);
+
+// Origin mapping
+const cx0 = pad - xMin * scale;
+const cy0 = H - pad + yMin * scale;
+
+function toCV(px, py) { return { x: cx0 + px * scale, y: cy0 - py * scale }; }
 
 let t = 0, running = false, raf = null, lastTime = null;
-let trailPts = [];
 
 function drawGrid() {
   ctx.strokeStyle = '#1a1a2e';
   ctx.lineWidth = 1;
-  for (let gx = Math.ceil(xMin); gx <= Math.floor(xMax); gx++) {
+  for (let gx = Math.floor(xMin); gx <= Math.ceil(xMax); gx++) {
     const p = toCV(gx, 0);
     ctx.beginPath(); ctx.moveTo(p.x, 0); ctx.lineTo(p.x, H); ctx.stroke();
   }
-  for (let gy = Math.ceil(yMin); gy <= Math.floor(yMax); gy++) {
+  for (let gy = Math.floor(yMin); gy <= Math.ceil(yMax); gy++) {
     const p = toCV(0, gy);
     ctx.beginPath(); ctx.moveTo(0, p.y); ctx.lineTo(W, p.y); ctx.stroke();
   }
+  
   // Axes
   ctx.strokeStyle = '#2a2a4a';
-  ctx.lineWidth = 1.5;
-  const orig = toCV(0,0);
-  ctx.beginPath(); ctx.moveTo(pad, orig.y); ctx.lineTo(W-pad, orig.y); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(orig.x, pad); ctx.lineTo(orig.x, H-pad); ctx.stroke();
-  // Labels
-  ctx.fillStyle = '#445';
-  ctx.font = '11px Courier New';
-  ctx.textAlign = 'center';
-  for (let gx = Math.ceil(xMin)+1; gx < Math.floor(xMax); gx+=2) {
-    const p = toCV(gx, 0); ctx.fillText(gx, p.x, orig.y+14);
-  }
-  ctx.textAlign = 'right';
-  for (let gy = Math.ceil(yMin)+1; gy < Math.floor(yMax); gy++) {
-    const p = toCV(0, gy); if (Math.abs(gy)>0.5) ctx.fillText(gy, orig.x-5, p.y+4);
-  }
-  ctx.fillStyle = '#556'; ctx.textAlign='left';
-  ctx.fillText('x [m]', W-pad-20, orig.y+14);
-  ctx.save(); ctx.translate(orig.x-14, pad+10); ctx.fillText('y [m]', 0, 0); ctx.restore();
+  ctx.lineWidth = 2;
+  const orig = toCV(0, 0);
+  ctx.beginPath(); ctx.moveTo(0, orig.y); ctx.lineTo(W, orig.y); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(orig.x, 0); ctx.lineTo(orig.x, H); ctx.stroke();
 }
 
-function drawArrow(x1,y1,x2,y2,color,label) {
-  const dx=x2-x1, dy=y2-y1, len=Math.sqrt(dx*dx+dy*dy);
-  if (len<2) return;
-  ctx.strokeStyle=color; ctx.fillStyle=color; ctx.lineWidth=2;
-  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
-  const ang=Math.atan2(dy,dx);
+function drawArrow(x1, y1, x2, y2, color, label) {
+  const dx = x2 - x1, dy = y2 - y1;
+  const len = Math.sqrt(dx * dx + dy * dy);
+  if (len < 5) return;
+  ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+  const ang = Math.atan2(dy, dx);
   ctx.beginPath();
-  ctx.moveTo(x2,y2);
-  ctx.lineTo(x2-8*Math.cos(ang-0.4),y2-8*Math.sin(ang-0.4));
-  ctx.lineTo(x2-8*Math.cos(ang+0.4),y2-8*Math.sin(ang+0.4));
-  ctx.closePath(); ctx.fill();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - 8 * Math.cos(ang - 0.4), y2 - 8 * Math.sin(ang - 0.4));
+  ctx.lineTo(x2 - 8 * Math.cos(ang + 0.4), y2 - 8 * Math.sin(ang + 0.4));
+  ctx.fill();
   if (label) {
-    ctx.font='11px Courier New'; ctx.fillStyle=color;
-    ctx.fillText(label, x2+8, y2+4);
+    ctx.font = 'bold 12px Courier New';
+    ctx.fillText(label, x2 + 5, y2 - 5);
   }
 }
 
 function draw() {
-  ctx.clearRect(0,0,W,H);
+  ctx.clearRect(0, 0, W, H);
   drawGrid();
 
-  // Full trajectory (ghost)
-  ctx.strokeStyle='#1e3555'; ctx.lineWidth=1.5; ctx.setLineDash([4,4]);
+  // Full path (ghost)
+  ctx.strokeStyle = '#1e3555'; ctx.lineWidth = 1; ctx.setLineDash([5, 5]);
   ctx.beginPath();
-  for (let i=0;i<=300;i++){const p=toCV(pts[i].x,pts[i].y); i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y);}
+  pts.forEach((p, i) => {
+    const c = toCV(p.x, p.y);
+    i === 0 ? ctx.moveTo(c.x, c.y) : ctx.lineTo(c.x, c.y);
+  });
   ctx.stroke(); ctx.setLineDash([]);
 
-  // Trail
-  if (trailPts.length > 1) {
-    ctx.beginPath();
-    ctx.moveTo(trailPts[0].x, trailPts[0].y);
-    for (let i=1;i<trailPts.length;i++) { ctx.lineTo(trailPts[i].x, trailPts[i].y); }
-    ctx.strokeStyle='#3388ff'; ctx.lineWidth=2; ctx.stroke();
+  // Active Trail
+  ctx.strokeStyle = '#44aaff'; ctx.lineWidth = 3;
+  ctx.beginPath();
+  for (let i = 0; i <= t * 100 / T_END; i++) {
+    const p = pos((i / 100) * T_END);
+    const c = toCV(p.x, p.y);
+    i === 0 ? ctx.moveTo(c.x, c.y) : ctx.lineTo(c.x, c.y);
   }
+  ctx.stroke();
 
   const p = pos(t), v = vel(t);
   const cp = toCV(p.x, p.y);
 
-  // Force arrow
-  const fScale = 12;
-  drawArrow(cp.x,cp.y, cp.x+6*fScale/scale, cp.y-1*fScale/scale, '#ff6644','F');
+  // Vectors
+  drawArrow(cp.x, cp.y, cp.x + 40, cp.y - 13.3, '#ff6644', 'F'); // Force (Fixed dir)
+  drawArrow(cp.x, cp.y, cp.x + v.x * 10, cp.y - v.y * 10, '#55dd55', 'v'); // Velocity
 
-  // Velocity arrow
-  const vScale = 10;
-  drawArrow(cp.x,cp.y, cp.x+v.x*vScale, cp.y-v.y*vScale, '#55dd55','v');
+  // Body
+  ctx.fillStyle = '#ffcc44';
+  ctx.beginPath(); ctx.arc(cp.x, cp.y, 8, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
 
-  // Body dot
-  ctx.beginPath(); ctx.arc(cp.x,cp.y,7,0,Math.PI*2);
-  ctx.fillStyle='#ffcc44'; ctx.fill();
-  ctx.strokeStyle='#ffee88'; ctx.lineWidth=1.5; ctx.stroke();
-
-  // Time label
-  ctx.fillStyle='#aaa'; ctx.font='12px Courier New'; ctx.textAlign='left';
-  ctx.fillText(`t = ${t.toFixed(2)} s`, 14, 20);
-
-  // Update panel
-  const ke = 0.5*m*(v.x*v.x+v.y*v.y);
-  const ke0 = 0.5*m*(vx0*vx0+vy0*vy0);
-  document.getElementById('tVal').textContent = t.toFixed(3)+' s';
-  document.getElementById('xVal').textContent = p.x.toFixed(3)+' m';
-  document.getElementById('yVal').textContent = p.y.toFixed(3)+' m';
-  document.getElementById('vxVal').textContent = v.x.toFixed(3)+' m/s';
-  document.getElementById('vyVal').textContent = v.y.toFixed(3)+' m/s';
-  document.getElementById('spVal').textContent = Math.sqrt(v.x*v.x+v.y*v.y).toFixed(3)+' m/s';
-  document.getElementById('keVal').textContent = ke.toFixed(3)+' J';
-  document.getElementById('wVal').textContent = (ke-ke0).toFixed(3)+' J';
+  // Panel Updates
+  const ke = 0.5 * m * (v.x * v.x + v.y * v.y);
+  const ke0 = 0.5 * m * (vx0 * vx0 + vy0 * vy0);
+  document.getElementById('tVal').textContent = t.toFixed(3) + ' s';
+  document.getElementById('xVal').textContent = p.x.toFixed(3) + ' m';
+  document.getElementById('yVal').textContent = p.y.toFixed(3) + ' m';
+  document.getElementById('vxVal').textContent = v.x.toFixed(3) + ' m/s';
+  document.getElementById('vyVal').textContent = v.y.toFixed(3) + ' m/s';
+  document.getElementById('spVal').textContent = Math.sqrt(v.x*v.x + v.y*v.y).toFixed(3) + ' m/s';
+  document.getElementById('keVal').textContent = ke.toFixed(3) + ' J';
+  document.getElementById('wVal').textContent = (ke - ke0).toFixed(3) + ' J';
 }
 
 function animate(ts) {
   if (!lastTime) lastTime = ts;
-  const dt = Math.min((ts-lastTime)/1000, 0.05);
+  const dt = (ts - lastTime) / 1000;
   lastTime = ts;
-  t = Math.min(t + dt, T_END);
-  const cp = toCV(pos(t).x, pos(t).y);
-  trailPts.push({x:cp.x, y:cp.y});
-  draw();
-  if (t < T_END) raf = requestAnimationFrame(animate);
-  else { running = false; document.getElementById('btnPlay').textContent='▶ PLAY'; }
-}
 
-function reset() {
-  if (raf) cancelAnimationFrame(raf); raf=null;
-  t=0; running=false; trailPts=[]; lastTime=null;
-  document.getElementById('btnPlay').textContent='▶ PLAY';
-  draw();
+  if (running) {
+    t += dt;
+    if (t >= T_END) {
+      t = T_END;
+      running = false;
+      document.getElementById('btnPlay').textContent = '▶ PLAY';
+    }
+    draw();
+    raf = requestAnimationFrame(animate);
+  }
 }
 
 document.getElementById('btnPlay').addEventListener('click', () => {
-  if (t >= T_END) reset();
-  if (!running) {
-    running=true; lastTime=null;
-    document.getElementById('btnPlay').textContent='⏸ PAUSE';
+  if (t >= T_END) t = 0;
+  running = !running;
+  document.getElementById('btnPlay').textContent = running ? '⏸ PAUSE' : '▶ PLAY';
+  if (running) {
+    lastTime = performance.now();
     raf = requestAnimationFrame(animate);
-  } else {
-    running=false; if(raf) cancelAnimationFrame(raf); raf=null;
-    document.getElementById('btnPlay').textContent='▶ PLAY';
   }
 });
-document.getElementById('btnReset').addEventListener('click', reset);
-draw();
+
+document.getElementById('btnReset').addEventListener('click', () => {
+  running = false;
+  t = 0;
+  lastTime = null;
+  cancelAnimationFrame(raf);
+  document.getElementById('btnPlay').textContent = '▶ PLAY';
+  draw();
+});
+
+draw(); // Initial state
 </script>
-</body>
-</html>
