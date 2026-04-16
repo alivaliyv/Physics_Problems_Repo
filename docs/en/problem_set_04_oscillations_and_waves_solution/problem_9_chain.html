@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Chain Wave</title>
+</head>
+<body>
+<canvas id="c" width="800" height="300"></canvas>
+<script>
+let ctx = document.getElementById("c").getContext("2d");
+
+let N=50;
+let x = new Array(N).fill(0);
+let v = new Array(N).fill(0);
+
+x[10]=1;
+
+function step(){
+    let dt=0.02;
+    let k=5;
+
+    let a = new Array(N).fill(0);
+
+    for(let i=1;i<N-1;i++){
+        a[i] = k*(x[i+1]-2*x[i]+x[i-1]);
+    }
+
+    for(let i=0;i<N;i++){
+        v[i]+=a[i]*dt;
+        x[i]+=v[i]*dt;
+    }
+}
+
+function draw(){
+    ctx.clearRect(0,0,800,300);
+    step();
+
+    for(let i=0;i<N;i++){
+        ctx.beginPath();
+        ctx.arc(i*15,150 + x[i]*50,3,0,2*Math.PI);
+        ctx.fill();
+    }
+
+    requestAnimationFrame(draw);
+}
+draw();
+</script>
+</body>
+</html>

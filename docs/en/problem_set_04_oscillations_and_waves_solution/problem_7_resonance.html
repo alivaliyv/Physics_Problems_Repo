@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Resonance</title>
+</head>
+<body>
+
+Ω: <input type="range" min="0" max="10" step="0.1" id="omega">
+
+<canvas id="c" width="800" height="400"></canvas>
+
+<script>
+let ctx = document.getElementById("c").getContext("2d");
+
+let m=1,k=10,b=0.5,F=1;
+let x=0,v=0,t=0;
+
+function step(O){
+    let dt=0.02;
+    let a = (F*Math.cos(O*t) - b*v - k*x)/m;
+    v += a*dt;
+    x += v*dt;
+    t+=dt;
+}
+
+function draw(){
+    let O = document.getElementById("omega").value;
+    ctx.clearRect(0,0,800,400);
+
+    step(O);
+
+    ctx.beginPath();
+    ctx.arc(400,200 + x*100,10,0,2*Math.PI);
+    ctx.fill();
+
+    requestAnimationFrame(draw);
+}
+draw();
+</script>
+
+</body>
+</html>

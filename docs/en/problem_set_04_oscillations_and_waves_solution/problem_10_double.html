@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Double Pendulum Chaos</title>
+</head>
+<body>
+
+perturbation: <input type="range" min="0.0001" max="0.1" step="0.0001" id="eps">
+
+<canvas id="c" width="800" height="600"></canvas>
+
+<script>
+let ctx = document.getElementById("c").getContext("2d");
+
+let N=50;
+let g=9.81,l=1,m=1,dt=0.01;
+
+let systems=[];
+
+function init(eps){
+    systems=[];
+    for(let i=0;i<N;i++){
+        systems.push({
+            t1: Math.PI/2,
+            t2: Math.PI/2 + i*eps,
+            w1:0,w2:0
+        });
+    }
+}
+
+function step(s){
+    let t1=s.t1,t2=s.t2,w1=s.w1,w2=s.w2;
+
+    let a1 = (-g*(2*Math.sin(t1)-Math.sin(t2)))/l;
+    let a2 = (-g*(Math.sin(t2)-Math.sin(t1)))/l;
+
+    s.w1+=a1*dt;
+    s.w2+=a2*dt;
+    s.t1+=s.w1*dt;
+    s.t2+=s.w2*dt;
+}
+
+function draw(){
+    let eps = parseFloat(document.getElementById("eps").value);
+    if(systems.length===0) init(eps);
+
+    ctx.clearRect(0,0,800,600);
+
+    for(let s of systems){
+        step(s);
+
+        let x1=400 + l*200*Math.sin(s.t1);
+        let y1=200 + l*200*Math.cos(s.t1);
+
+        let x2=x1 + l*200*Math.sin(s.t2);
+        let y2=y1 + l*200*Math.cos(s.t2);
+
+        ctx.beginPath();
+        ctx.moveTo(400,200);
+        ctx.lineTo(x1,y1);
+        ctx.lineTo(x2,y2);
+        ctx.stroke();
+    }
+
+    requestAnimationFrame(draw);
+}
+
+draw();
+</script>
+
+</body>
+</html>

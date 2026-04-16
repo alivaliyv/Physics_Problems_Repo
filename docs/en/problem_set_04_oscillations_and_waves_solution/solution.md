@@ -1,466 +1,1240 @@
-# Problem Set 4 – Solutions: Oscillations and Waves
+# Problem Set 04 – Solutions
 
-## Task 1 – Harmonic motion: motion parameters
+## File Map
 
-### Problem Statement
+The following standalone visualization files accompany this notebook:
 
-A function describing harmonic motion is given:
+- `problem_set_04_vis_problem_05_beats.html`
+- `problem_set_04_vis_problem_06_damped_oscillator.html`
+- `problem_set_04_vis_problem_07_resonance.html`
+- `problem_set_04_vis_problem_08_coupled_springs.html`
+- `problem_set_04_vis_problem_09_chain_of_springs.html`
+- `problem_set_04_vis_problem_10_double_pendulum_ensemble.html`
+
+---
+
+# Task 01 – Harmonic Motion: Motion Parameters
+
+## Problem Statement
+
+The harmonic motion is described by
 
 $$
 x(t) = A \cos(\omega t + \varphi)
 $$
 
-1. Determine the period $T$ and the frequency $f$.
-2. Determine the maximum velocity and the maximum acceleration.
-3. For $A = 0.2$ m, $f = 2$ Hz: calculate $\omega$, $v_{\max}$, and $a_{\max}$.
+Determine the period $T$, the frequency $f$, the maximum velocity, and the maximum acceleration. Then evaluate these quantities for $A = 0.2\ \mathrm{m}$ and $f = 2\ \mathrm{Hz}$.
 
-### Theory
+## Theory
 
-Simple Harmonic Motion (SHM) is a type of periodic motion where the restoring force is directly proportional to the displacement. The kinematic parameters are derived by taking time derivatives of the position function $x(t)$.
-
-### Step-by-Step Solution
-
-**1. Period and Frequency**
-
-The argument of the cosine function completes one full cycle ($2\pi$ radians) in one period $T$. Therefore:
+For harmonic motion, the angular frequency, period, and frequency satisfy
 
 $$
-\omega T = 2\pi \implies T = \frac{2\pi}{\omega}
+\omega = 2 \pi f = \frac{2 \pi}{T}
 $$
 
-Frequency $f$ is the reciprocal of the period:
+Hence,
 
 $$
-f = \frac{1}{T} = \frac{\omega}{2\pi}
+T = \frac{2 \pi}{\omega},
+\qquad
+f = \frac{1}{T} = \frac{\omega}{2 \pi}
 $$
 
-**2. Maximum Velocity and Acceleration**
+Velocity and acceleration are obtained by differentiation.
 
-Velocity is the first derivative of position with respect to time:
+## Step-by-Step Solution
 
-$$
-v(t) = \frac{dx}{dt} = -A\omega \sin(\omega t + \varphi)
-$$
-
-The maximum velocity occurs when $|\sin(\omega t + \varphi)| = 1$:
+The displacement is
 
 $$
-v_{\max} = A\omega
+x(t) = A \cos(\omega t + \varphi)
 $$
 
-Acceleration is the second derivative of position:
+The velocity is
 
 $$
-a(t) = \frac{dv}{dt} = -A\omega^2 \cos(\omega t + \varphi)
+v(t) = \frac{dx}{dt} = - A \omega \sin(\omega t + \varphi)
 $$
 
-The maximum acceleration occurs when $|\cos(\omega t + \varphi)| = 1$:
+Its magnitude is maximal when $\sin(\omega t + \varphi) = \pm 1$, therefore
 
 $$
-a_{\max} = A\omega^2
+v_{\max} = A \omega
 $$
 
-**3. Numerical Calculations**
-
-Given $A = 0.2$ m and $f = 2$ Hz:
+The acceleration is
 
 $$
-\omega = 2\pi f = 2\pi(2) = 4\pi \approx 12.57\ \text{rad/s}
+a(t) = \frac{d^2x}{dt^2} = - A \omega^2 \cos(\omega t + \varphi)
+$$
+
+Its magnitude is maximal when $\cos(\omega t + \varphi) = \pm 1$, hence
+
+$$
+a_{\max} = A \omega^2
+$$
+
+For $A = 0.2\ \mathrm{m}$ and $f = 2\ \mathrm{Hz}$,
+
+$$
+\omega = 2 \pi f = 2 \pi \cdot 2 = 4 \pi\ \mathrm{rad/s}
+$$
+
+Numerically,
+
+$$
+\omega \approx 12.57\ \mathrm{rad/s}
+$$
+
+Then
+
+$$
+v_{\max} = A \omega = 0.2 \cdot 4 \pi = 0.8 \pi\ \mathrm{m/s}
 $$
 
 $$
-v_{\max} = A\omega = 0.2 \cdot 4\pi = 0.8\pi \approx 2.51\ \text{m/s}
+v_{\max} \approx 2.51\ \mathrm{m/s}
+$$
+
+and
+
+$$
+a_{\max} = A \omega^2 = 0.2 \cdot (4 \pi)^2 = 3.2 \pi^2\ \mathrm{m/s^2}
 $$
 
 $$
-a_{\max} = A\omega^2 = 0.2 \cdot (4\pi)^2 = 0.2 \cdot 16\pi^2 = 3.2\pi^2 \approx 31.58\ \text{m/s}^2
+a_{\max} \approx 31.58\ \mathrm{m/s^2}
 $$
 
-### Final Result
+The period is
 
-* $T = 2\pi/\omega$
-* $f = \omega/2\pi$
-* $v_{\max} = A\omega$
-* $a_{\max} = A\omega^2$
-* For the given values: $\omega \approx 12.57\ \text{rad/s}$, $v_{\max} \approx 2.51\ \text{m/s}$, $a_{\max} \approx 31.58\ \text{m/s}^2$.
+$$
+T = \frac{1}{f} = \frac{1}{2} = 0.5\ \mathrm{s}
+$$
 
-### Interpretation
+## Final Result
 
-The maximum velocity occurs as the object passes through the equilibrium position ($x=0$), while the maximum acceleration occurs at the turning points ($x = \pm A$), where the restoring force is greatest.
+$$
+T = \frac{2 \pi}{\omega},
+\qquad
+f = \frac{\omega}{2 \pi}
+$$
+
+$$
+v_{\max} = A \omega,
+\qquad
+a_{\max} = A \omega^2
+$$
+
+For $A = 0.2\ \mathrm{m}$ and $f = 2\ \mathrm{Hz}$,
+
+$$
+\omega = 4 \pi\ \mathrm{rad/s} \approx 12.57\ \mathrm{rad/s}
+$$
+
+$$
+v_{\max} = 0.8 \pi\ \mathrm{m/s} \approx 2.51\ \mathrm{m/s}
+$$
+
+$$
+a_{\max} = 3.2 \pi^2\ \mathrm{m/s^2} \approx 31.58\ \mathrm{m/s^2}
+$$
+
+## Interpretation
+
+The maximum velocity grows linearly with frequency, while the maximum acceleration grows quadratically with frequency. This explains why fast oscillations can produce large accelerations even for small amplitudes.
 
 ---
 
-## Task 2 – Energy of a harmonic oscillator
+# Task 02 – Energy of a Harmonic Oscillator
 
-### Problem Statement
+## Problem Statement
 
-A system with $m = 1\ \text{kg}$, $k = 100\ \text{N/m}$, $x(0) = 2\ \text{m}$, and $v(0) = 1\ \text{m/s}$ is given.
+Given
 
-1. Determine the natural frequency.
-2. Calculate the total energy of the system.
-3. For what displacement does the kinetic energy account for 50% of the total energy?
+- $m = 1\ \mathrm{kg}$
+- $k = 100\ \mathrm{N/m}$
+- $x(0) = 2\ \mathrm{m}$
+- $v(0) = 1\ \mathrm{m/s}$
 
-### Theory
+determine the natural frequency, the total energy, and the displacement for which the kinetic energy is equal to $50\%$ of the total energy.
 
-The total mechanical energy $E$ of a harmonic oscillator is the sum of its kinetic energy $K$ and potential energy $U$:
+## Theory
 
-$$
-E = K + U = \frac{1}{2}mv^2 + \frac{1}{2}kx^2
-$$
-
-In a closed system, $E$ remains constant.
-
-### Step-by-Step Solution
-
-**1. Natural Frequency**
-
-The angular frequency $\omega$ for a mass-spring system is:
+For the ideal mass–spring oscillator,
 
 $$
-\omega = \sqrt{\frac{k}{m}} = \sqrt{\frac{100}{1}} = 10\ \text{rad/s}
+m \ddot{x} + kx = 0
 $$
 
-The natural frequency $f$ is:
+The natural angular frequency is
 
 $$
-f = \frac{\omega}{2\pi} = \frac{10}{2\pi} \approx 1.59\ \text{Hz}
+\omega_0 = \sqrt{\frac{k}{m}}
 $$
 
-**2. Total Energy**
-
-Using the initial conditions:
+The total mechanical energy is conserved:
 
 $$
-E = \frac{1}{2}(1)(1)^2 + \frac{1}{2}(100)(2)^2 = 0.5 + 200 = 200.5\ \text{J}
+E = \frac{1}{2} m v^2 + \frac{1}{2} k x^2
 $$
 
-**3. Displacement for 50% Kinetic Energy**
+## Step-by-Step Solution
 
-If $K = 0.5E$, then $U = 0.5E$ because $K + U = E$.
-
-$$
-\frac{1}{2}kx^2 = 0.5 E
-$$
+The natural angular frequency is
 
 $$
-x = \sqrt{\frac{E}{k}} = \sqrt{\frac{200.5}{100}} = \sqrt{2.005} \approx 1.416\ \text{m}
+\omega_0 = \sqrt{\frac{100}{1}} = 10\ \mathrm{rad/s}
 $$
 
-### Final Result
+The ordinary frequency is
 
-* $\omega = 10\ \text{rad/s}$
-* $E = 200.5\ \text{J}$
-* $x \approx 1.416\ \text{m}$
+$$
+f_0 = \frac{\omega_0}{2 \pi} = \frac{10}{2 \pi} \approx 1.59\ \mathrm{Hz}
+$$
 
-### Interpretation
+At $t = 0$ the energy is
 
-The total energy is defined by the initial state. When the energy is split equally between kinetic and potential forms, the displacement is $1/\sqrt{2}$ of the maximum amplitude $A$, since $E = \frac{1}{2}kA^2$.
+$$
+E = \frac{1}{2} m v(0)^2 + \frac{1}{2} k x(0)^2
+$$
+
+Substituting the numbers gives
+
+$$
+E = \frac{1}{2} \cdot 1 \cdot 1^2 + \frac{1}{2} \cdot 100 \cdot 2^2
+$$
+
+$$
+E = 0.5 + 200 = 200.5\ \mathrm{J}
+$$
+
+For the kinetic energy to be $50\%$ of the total energy,
+
+$$
+K = \frac{1}{2} E
+$$
+
+Therefore the potential energy must also be
+
+$$
+U = \frac{1}{2} E
+$$
+
+Using
+
+$$
+U = \frac{1}{2} k x^2
+$$
+
+one gets
+
+$$
+\frac{1}{2} k x^2 = \frac{E}{2}
+$$
+
+Hence
+
+$$
+k x^2 = E
+$$
+
+and
+
+$$
+x^2 = \frac{E}{k} = \frac{200.5}{100} = 2.005
+$$
+
+Thus
+
+$$
+x = \pm \sqrt{2.005}\ \mathrm{m}
+$$
+
+$$
+x \approx \pm 1.416\ \mathrm{m}
+$$
+
+## Final Result
+
+$$
+\omega_0 = 10\ \mathrm{rad/s},
+\qquad
+f_0 \approx 1.59\ \mathrm{Hz}
+$$
+
+$$
+E = 200.5\ \mathrm{J}
+$$
+
+The kinetic energy is $50\%$ of the total energy at
+
+$$
+x \approx \pm 1.416\ \mathrm{m}
+$$
+
+## Interpretation
+
+At these positions, the oscillator has exactly the same amount of kinetic and potential energy. The total energy remains constant, but its partition between motion and deformation changes continuously.
 
 ---
 
-## Task 3 – Harmonic wave
+# Task 03 – Harmonic Wave
 
-### Problem Statement
+## Problem Statement
 
-Wave equation: $y(x,t) = A \sin(kx - \omega t)$.
-
-1. Determine the wavelength.
-2. Determine the phase velocity.
-3. Calculate $v$ for $k = 4\pi$, $\omega = 20\pi$.
-4. Does the point $x = \lambda$ oscillate in phase with $x = 0$?
-
-### Step-by-Step Solution
-
-**1. Wavelength**
-
-The wave number $k$ is defined as:
+The wave is
 
 $$
-k = \frac{2\pi}{\lambda} \implies \lambda = \frac{2\pi}{k}
+y(x,t) = A \sin(kx - \omega t)
 $$
 
-**2. Phase Velocity**
+Determine the wavelength, phase velocity, and evaluate the phase velocity for $k = 4 \pi$ and $\omega = 20 \pi$. Determine whether the points $x = \lambda$ and $x = 0$ oscillate in phase.
 
-The velocity $v$ at which a point of constant phase moves is:
+## Theory
+
+For a harmonic wave,
+
+$$
+k = \frac{2 \pi}{\lambda}
+$$
+
+and the phase velocity is
 
 $$
 v = \frac{\omega}{k}
 $$
 
-**3. Numerical Calculation**
+## Step-by-Step Solution
+
+From the definition of the wave number,
 
 $$
-v = \frac{20\pi}{4\pi} = 5\ \text{units/s}
+\lambda = \frac{2 \pi}{k}
 $$
 
-**4. Phase Comparison**
+The phase condition is
 
-The phase is $\Phi(x,t) = kx - \omega t$.
-At $x = 0$: $\Phi_0 = -\omega t$.
-At $x = \lambda$: $\Phi_\lambda = k\lambda - \omega t = \frac{2\pi}{\lambda}\lambda - \omega t = 2\pi - \omega t$.
+$$
+kx - \omega t = \mathrm{const.}
+$$
 
-Since the phase difference is exactly $2\pi$, the points oscillate in phase.
+Differentiating with respect to time gives
 
-### Final Result
+$$
+k \frac{dx}{dt} - \omega = 0
+$$
 
-* $\lambda = 2\pi/k$
-* $v = \omega/k = 5$
-* Yes, they are in phase.
+Therefore,
+
+$$
+v = \frac{dx}{dt} = \frac{\omega}{k}
+$$
+
+For $k = 4 \pi$ and $\omega = 20 \pi$,
+
+$$
+\lambda = \frac{2 \pi}{4 \pi} = \frac{1}{2}\ \mathrm{m}
+$$
+
+and
+
+$$
+v = \frac{20 \pi}{4 \pi} = 5\ \mathrm{m/s}
+$$
+
+Now compare the phase at $x = 0$ and $x = \lambda$.
+
+At $x = 0$,
+
+$$
+y(0,t) = A \sin(-\omega t)
+$$
+
+At $x = \lambda$,
+
+$$
+y(\lambda,t) = A \sin(k \lambda - \omega t)
+$$
+
+Since
+
+$$
+k \lambda = \frac{2 \pi}{\lambda} \lambda = 2 \pi
+$$
+
+it follows that
+
+$$
+y(\lambda,t) = A \sin(2 \pi - \omega t) = A \sin(-\omega t)
+$$
+
+Therefore the two points oscillate in phase.
+
+## Final Result
+
+$$
+\lambda = \frac{2 \pi}{k}
+$$
+
+$$
+v = \frac{\omega}{k}
+$$
+
+For $k = 4 \pi$ and $\omega = 20 \pi$,
+
+$$
+\lambda = 0.5\ \mathrm{m}
+$$
+
+$$
+v = 5\ \mathrm{m/s}
+$$
+
+The points $x = 0$ and $x = \lambda$ oscillate in phase.
+
+## Interpretation
+
+Points separated by one wavelength differ in phase by $2 \pi$, which corresponds to the same oscillatory state. This is the spatial periodicity of the wave.
 
 ---
 
-## Task 4 – Wave equation
+# Task 04 – Wave Equation
 
-### Problem Statement
+## Problem Statement
 
-Verify $y(x,t) = A \cos(kx - \omega t)$ satisfies $\frac{\partial^2 y}{\partial t^2} = v^2 \frac{\partial^2 y}{\partial x^2}$.
-
-### Step-by-Step Solution
-
-Calculate second derivatives:
+Verify that
 
 $$
-\frac{\partial y}{\partial t} = A\omega \sin(kx - \omega t) \implies \frac{\partial^2 y}{\partial t^2} = -A\omega^2 \cos(kx - \omega t)
+y(x,t) = A \cos(kx - \omega t)
 $$
 
-$$
-\frac{\partial y}{\partial x} = -Ak \sin(kx - \omega t) \implies \frac{\partial^2 y}{\partial x^2} = -Ak^2 \cos(kx - \omega t)
-$$
-
-Substitute into the wave equation:
+satisfies
 
 $$
--A\omega^2 \cos(kx - \omega t) = v^2 (-Ak^2 \cos(kx - \omega t))
+\frac{\partial^2 y}{\partial t^2} = v^2 \frac{\partial^2 y}{\partial x^2}
 $$
 
-Dividing by the common terms:
+and determine the relation between $v$, $k$, and $\omega$.
+
+## Theory
+
+A sinusoidal traveling wave is a standard solution of the one-dimensional wave equation if its temporal and spatial derivatives differ only by a constant factor.
+
+## Step-by-Step Solution
+
+Let
+
+$$
+\Phi = kx - \omega t
+$$
+
+Then
+
+$$
+y(x,t) = A \cos \Phi
+$$
+
+The first derivative with respect to time is
+
+$$
+\frac{\partial y}{\partial t} = - A \sin \Phi \cdot \frac{\partial \Phi}{\partial t}
+$$
+
+Since
+
+$$
+\frac{\partial \Phi}{\partial t} = - \omega
+$$
+
+one gets
+
+$$
+\frac{\partial y}{\partial t} = A \omega \sin \Phi
+$$
+
+Differentiating once more,
+
+$$
+\frac{\partial^2 y}{\partial t^2} = A \omega \cos \Phi \cdot \frac{\partial \Phi}{\partial t}
+$$
+
+Thus,
+
+$$
+\frac{\partial^2 y}{\partial t^2} = - A \omega^2 \cos \Phi
+$$
+
+Now differentiate with respect to $x$:
+
+$$
+\frac{\partial y}{\partial x} = - A \sin \Phi \cdot \frac{\partial \Phi}{\partial x}
+$$
+
+Since
+
+$$
+\frac{\partial \Phi}{\partial x} = k
+$$
+
+it follows that
+
+$$
+\frac{\partial y}{\partial x} = - A k \sin \Phi
+$$
+
+and therefore
+
+$$
+\frac{\partial^2 y}{\partial x^2} = - A k^2 \cos \Phi
+$$
+
+Substitute both expressions into the wave equation:
+
+$$
+- A \omega^2 \cos \Phi = v^2 (- A k^2 \cos \Phi)
+$$
+
+For nontrivial waves this implies
 
 $$
 \omega^2 = v^2 k^2
 $$
 
-### Final Result
+Hence,
 
-The relation is $v = \frac{\omega}{k}$.
+$$
+v = \frac{\omega}{k}
+$$
+
+## Final Result
+
+The function
+
+$$
+y(x,t) = A \cos(kx - \omega t)
+$$
+
+satisfies the wave equation provided that
+
+$$
+\omega^2 = v^2 k^2
+$$
+
+or equivalently
+
+$$
+v = \frac{\omega}{k}
+$$
+
+## Interpretation
+
+The wave equation constrains the temporal and spatial oscillation scales so that the disturbance propagates with a definite speed.
 
 ---
 
-## Task 5 – Superposition of waves, beats, and group velocity
+# Task 05 – Superposition of Waves, Beats, and Group Velocity
 
-### Problem Statement
+## Problem Statement
 
-Two harmonic waves are given:
-$y_1(x,t)=A\sin(kx-\omega t)$
-$y_2(x,t)=A\sin(kx-(\omega+\Delta\omega)t)$
-
-1. Determine the resultant wave $y=y_1+y_2$ in product form.
-2. Identify the beat frequency and beat period at $x=0$.
-3. Interpret the envelope and carrier wave.
-
-### Theory
-
-The superposition principle states that the resultant displacement is the algebraic sum of individual wave displacements. When two waves of slightly different frequencies interfere, they produce "beats."
-
-### Step-by-Step Solution
-
-**1. Resultant Wave**
-
-Using the trigonometric identity $\sin \alpha + \sin \beta = 2 \sin\left(\frac{\alpha + \beta}{2}\right) \cos\left(\frac{\alpha - \beta}{2}\right)$:
-
-Let $\alpha = kx - \omega t$ and $\beta = kx - (\omega + \Delta\omega)t$.
+Two waves are given:
 
 $$
-y = 2A \sin\left(\frac{2kx - (2\omega + \Delta\omega)t}{2}\right) \cos\left(\frac{\Delta\omega t}{2}\right)
+y_1(x,t) = A \sin(kx - \omega t)
 $$
 
-Assuming $\Delta\omega \ll \omega$, we can approximate the result as:
-
 $$
-y(x,t) = \left[ 2A \cos\left(\frac{\Delta\omega}{2}t\right) \right] \sin(kx - \omega t)
+y_2(x,t) = A \sin(kx - (\omega + \Delta \omega)t)
 $$
 
-**2. Beats at $x=0$**
+Determine the resultant wave, the beat frequency, the beat period at $x = 0$, and the physical interpretation of the carrier and envelope.
 
-At $x=0$, $y(0,t) = 2A \cos\left(\frac{\Delta\omega}{2}t\right) \sin(-\omega t)$. The intensity (amplitude squared) varies with the term $\cos^2(\frac{\Delta\omega}{2}t)$.
-The beat frequency $f_{beat}$ is the difference between the two frequencies:
+## Theory
 
-$$
-f_{beat} = \frac{\Delta\omega}{2\pi}
-$$
-
-The beat period is:
+The trigonometric identity
 
 $$
-T_{beat} = \frac{1}{f_{beat}} = \frac{2\pi}{\Delta\omega}
+\sin \alpha + \sin \beta = 2 \sin \left( \frac{\alpha + \beta}{2} \right) \cos \left( \frac{\alpha - \beta}{2} \right)
 $$
 
-### Interpretation
+transforms the sum into product form.
 
-* **Envelope:** The term $2A \cos(\frac{\Delta\omega}{2}t)$ describes the slow-moving "envelope" that modulates the amplitude.
-* **Carrier:** The $\sin(kx - \omega t)$ term is the "carrier wave," representing the rapid oscillations within the envelope.
+## Step-by-Step Solution
+
+Let
+
+$$
+\alpha = kx - \omega t
+$$
+
+and
+
+$$
+\beta = kx - (\omega + \Delta \omega)t
+$$
+
+Then
+
+$$
+y = y_1 + y_2 = A (\sin \alpha + \sin \beta)
+$$
+
+Using the identity above,
+
+$$
+y = 2A \sin \left( \frac{\alpha + \beta}{2} \right) \cos \left( \frac{\alpha - \beta}{2} \right)
+$$
+
+Now compute the combinations:
+
+$$
+\frac{\alpha + \beta}{2}
+= \frac{2kx - (2\omega + \Delta \omega)t}{2}
+= kx - \left( \omega + \frac{\Delta \omega}{2} \right)t
+$$
+
+and
+
+$$
+\frac{\alpha - \beta}{2}
+= \frac{\Delta \omega t}{2}
+$$
+
+Thus the resultant wave is
+
+$$
+y(x,t) = 2A \sin \left( kx - \left( \omega + \frac{\Delta \omega}{2} \right)t \right)
+\cos \left( \frac{\Delta \omega}{2} t \right)
+$$
+
+At fixed position $x = 0$,
+
+$$
+y(0,t) = - 2A \sin \left( \left( \omega + \frac{\Delta \omega}{2} \right)t \right)
+\cos \left( \frac{\Delta \omega}{2} t \right)
+$$
+
+The slowly varying amplitude factor is
+
+$$
+A_{\mathrm{env}}(t) = 2A \cos \left( \frac{\Delta \omega}{2} t \right)
+$$
+
+The envelope repeats when the absolute value of this factor repeats, so the beat angular frequency is
+
+$$
+\omega_{\mathrm{beat}} = \Delta \omega
+$$
+
+Therefore the beat frequency is
+
+$$
+f_{\mathrm{beat}} = \frac{\Delta \omega}{2 \pi}
+$$
+
+and the beat period is
+
+$$
+T_{\mathrm{beat}} = \frac{2 \pi}{\Delta \omega}
+$$
+
+## Final Result
+
+$$
+y(x,t) = 2A \sin \left( kx - \left( \omega + \frac{\Delta \omega}{2} \right)t \right)
+\cos \left( \frac{\Delta \omega}{2} t \right)
+$$
+
+Carrier wave:
+
+$$
+\sin \left( kx - \left( \omega + \frac{\Delta \omega}{2} \right)t \right)
+$$
+
+Envelope:
+
+$$
+2A \cos \left( \frac{\Delta \omega}{2} t \right)
+$$
+
+Beat frequency:
+
+$$
+f_{\mathrm{beat}} = \frac{\Delta \omega}{2 \pi}
+$$
+
+Beat period:
+
+$$
+T_{\mathrm{beat}} = \frac{2 \pi}{\Delta \omega}
+$$
+
+## Interpretation
+
+The carrier describes the rapid oscillation, while the envelope describes the slow modulation of amplitude. Beats arise from interference between nearby frequencies. The visualization file is `problem_set_04_vis_problem_05_beats.html`.
 
 ---
 
-## Task 6 – Damped oscillator
+# Task 06 – Damped Oscillator
 
-### Problem Statement
+## Problem Statement
 
-Equation: $m \frac{d^2 x}{dt^2} + b \frac{dx}{dt} + k x = 0$.
-
-1. Derive the general solution.
-2. Classify the cases.
-
-### Theory
-
-This is a second-order linear homogeneous differential equation. We assume a solution of the form $x(t) = e^{rt}$.
-
-### Step-by-Step Solution
-
-Substituting $x = e^{rt}$ into the equation:
+Consider
 
 $$
-mr^2 + br + k = 0 \implies r = \frac{-b \pm \sqrt{b^2 - 4mk}}{2m}
+m \ddot{x} + b \dot{x} + kx = 0
 $$
 
-Let $\gamma = \frac{b}{2m}$ and $\omega_0 = \sqrt{\frac{k}{m}}$. Then $r = -\gamma \pm \sqrt{\gamma^2 - \omega_0^2}$.
+Derive the general solutions for the underdamped, critically damped, and overdamped cases, classify the regimes, and discuss the numerical solution and the influence of $b$.
 
-**Classification:**
+## Theory
 
-1.  **Underdamped ($\gamma < \omega_0$):** $b^2 < 4mk$. The roots are complex.
-    $x(t) = e^{-\gamma t}(C_1 \cos(\omega_d t) + C_2 \sin(\omega_d t))$, where $\omega_d = \sqrt{\omega_0^2 - \gamma^2}$.
-2.  **Critically Damped ($\gamma = \omega_0$):** $b^2 = 4mk$. Real, repeated roots.
-    $x(t) = (C_1 + C_2 t)e^{-\gamma t}$.
-3.  **Overdamped ($\gamma > \omega_0$):** $b^2 > 4mk$. Real, distinct roots.
-    $x(t) = C_1 e^{r_1 t} + C_2 e^{r_2 t}$.
+Assume an exponential solution
+
+$$
+x(t) = e^{rt}
+$$
+
+Substitution yields the characteristic equation
+
+$$
+m r^2 + b r + k = 0
+$$
+
+with roots
+
+$$
+r_{1,2} = \frac{-b \pm \sqrt{b^2 - 4mk}}{2m}
+$$
+
+The discriminant determines the character of the motion.
+
+## Step-by-Step Solution
+
+### Classification
+
+The discriminant is
+
+$$
+\Delta = b^2 - 4mk
+$$
+
+Three regimes appear.
+
+### Underdamped case
+
+If
+
+$$
+b^2 < 4mk
+$$
+
+the roots are complex:
+
+$$
+r = - \frac{b}{2m} \pm i \omega_d
+$$
+
+where
+
+$$
+\omega_d = \sqrt{\frac{k}{m} - \frac{b^2}{4m^2}}
+$$
+
+The solution is
+
+$$
+x(t) = e^{-bt/(2m)} \left( C_1 \cos(\omega_d t) + C_2 \sin(\omega_d t) \right)
+$$
+
+### Critically damped case
+
+If
+
+$$
+b^2 = 4mk
+$$
+
+there is a repeated root
+
+$$
+r = - \frac{b}{2m}
+$$
+
+and the solution is
+
+$$
+x(t) = (C_1 + C_2 t) e^{-bt/(2m)}
+$$
+
+### Overdamped case
+
+If
+
+$$
+b^2 > 4mk
+$$
+
+the roots are real and distinct:
+
+$$
+r_{1,2} = \frac{-b \pm \sqrt{b^2 - 4mk}}{2m}
+$$
+
+Hence,
+
+$$
+x(t) = C_1 e^{r_1 t} + C_2 e^{r_2 t}
+$$
+
+### Numerical formulation
+
+Introduce the state variables
+
+$$
+x_1 = x,
+\qquad
+x_2 = \dot{x}
+$$
+
+Then
+
+$$
+\dot{x}_1 = x_2
+$$
+
+$$
+\dot{x}_2 = - \frac{b}{m} x_2 - \frac{k}{m} x_1
+$$
+
+This system is suitable for RK4 integration.
+
+### Effect of $b$
+
+Increasing $b$ produces the following changes:
+
+- weaker oscillatory behavior,
+- stronger decay of amplitude,
+- eventual disappearance of oscillations,
+- a phase portrait that contracts more rapidly toward the origin.
+
+## Final Result
+
+The characteristic equation is
+
+$$
+m r^2 + b r + k = 0
+$$
+
+with three regimes:
+
+### Underdamped
+
+$$
+b^2 < 4mk
+$$
+
+$$
+x(t) = e^{-bt/(2m)} \left( C_1 \cos(\omega_d t) + C_2 \sin(\omega_d t) \right)
+$$
+
+### Critically damped
+
+$$
+b^2 = 4mk
+$$
+
+$$
+x(t) = (C_1 + C_2 t) e^{-bt/(2m)}
+$$
+
+### Overdamped
+
+$$
+b^2 > 4mk
+$$
+
+$$
+x(t) = C_1 e^{r_1 t} + C_2 e^{r_2 t}
+$$
+
+The visualization file is `problem_set_04_vis_problem_06_damped_oscillator.html`.
+
+## Interpretation
+
+Damping controls the competition between inertia, restoring force, and dissipation. The critically damped case returns to equilibrium fastest without oscillating. The underdamped case is most similar to ordinary oscillatory motion but with exponentially decaying amplitude.
 
 ---
 
-## Task 7 – Forced oscillator and resonance
+# Task 07 – Forced Oscillator and Resonance
 
-### Problem Statement
+## Problem Statement
 
-Equation: $m \ddot{x} + b \dot{x} + kx = F_0 \cos(\Omega t)$.
-
-1. Solve for steady-state amplitude $A(\Omega)$.
-2. Interpret resonance.
-
-### Step-by-Step Solution
-
-The steady-state solution is $x(t) = A \cos(\Omega t - \delta)$. Substituting this into the differential equation and solving for $A$:
+Consider the forced damped oscillator
 
 $$
-A(\Omega) = \frac{F_0}{\sqrt{(k - m\Omega^2)^2 + (b\Omega)^2}}
+m \ddot{x} + b \dot{x} + kx = F_0 \cos(\Omega t)
 $$
 
-To find the resonance frequency $\Omega_r$, we minimize the denominator:
+Determine the steady-state amplitude as a function of $\Omega$, discuss the phase shift, and interpret resonance.
+
+## Theory
+
+The solution is the sum of a transient part and a steady-state part. After a sufficiently long time, only the steady-state oscillation remains.
+
+Seek a particular solution of the form
 
 $$
-\Omega_r = \sqrt{\omega_0^2 - 2\gamma^2}
+x_p(t) = X \cos(\Omega t - \delta)
 $$
 
-### Interpretation
+## Step-by-Step Solution
 
-Resonance occurs when the driving frequency $\Omega$ is close to the natural frequency $\omega_0$, leading to a massive increase in oscillation amplitude.
+Using the complex representation or direct substitution leads to the steady-state amplitude
+
+$$
+X(\Omega) =
+\frac{F_0}{\sqrt{(k - m \Omega^2)^2 + (b \Omega)^2}}
+$$
+
+The phase shift satisfies
+
+$$
+\tan \delta = \frac{b \Omega}{k - m \Omega^2}
+$$
+
+The full solution is
+
+$$
+x(t) = x_{\mathrm{tr}}(t) + X(\Omega) \cos(\Omega t - \delta)
+$$
+
+where $x_{\mathrm{tr}}(t)$ is the damped transient contribution.
+
+For weak damping, the resonance peak occurs near
+
+$$
+\Omega \approx \omega_0 = \sqrt{\frac{k}{m}}
+$$
+
+More precisely, for finite damping the amplitude maximum occurs at
+
+$$
+\Omega_{\mathrm{res}} = \sqrt{\frac{k}{m} - \frac{b^2}{2m^2}}
+$$
+
+provided the expression under the square root is positive.
+
+## Final Result
+
+Steady-state amplitude:
+
+$$
+X(\Omega) =
+\frac{F_0}{\sqrt{(k - m \Omega^2)^2 + (b \Omega)^2}}
+$$
+
+Phase shift:
+
+$$
+\tan \delta = \frac{b \Omega}{k - m \Omega^2}
+$$
+
+The resonance curve is the graph of $X(\Omega)$ versus $\Omega$. The visualization file is `problem_set_04_vis_problem_07_resonance.html`.
+
+## Interpretation
+
+At low frequency the motion is nearly in phase with the external force. Near resonance the response becomes maximal. At high frequency the displacement lags and the amplitude decreases because the mass cannot follow the fast forcing effectively.
 
 ---
 
-## Task 8 – Two coupled springs
+# Task 08 – Two Coupled Springs (Two Degrees of Freedom)
 
-### Equations of Motion
+## Problem Statement
 
-For two masses $m_1, m_2$ and three springs $k_1, k_2, k_3$:
+Two masses are connected in series to walls by three springs with constants $k_1$, $k_2$, and $k_3$.
+
+## Theory
+
+Let $x_1$ and $x_2$ be the displacements from equilibrium. The restoring forces are determined by the elongations of the springs.
+
+## Step-by-Step Solution
+
+For mass $m_1$,
 
 $$
-\begin{pmatrix} 
-m_1 & 0 \\ 
-0 & m_2 
-\end{pmatrix} 
-\begin{pmatrix} 
-\ddot{x}_1 \\ 
-\ddot{x}_2 
-\end{pmatrix} +
-\begin{pmatrix} 
-k_1 + k_2 & -k_2 \\ 
--k_2 & k_2 + k_3 
-\end{pmatrix} 
-\begin{pmatrix} 
-x_1 \\ 
-x_2 
-\end{pmatrix} = 
-\begin{pmatrix} 
-0 \\ 
-0 
+m_1 \ddot{x}_1 = -k_1 x_1 - k_2 (x_1 - x_2)
+$$
+
+For mass $m_2$,
+
+$$
+m_2 \ddot{x}_2 = -k_3 x_2 - k_2 (x_2 - x_1)
+$$
+
+Thus,
+
+$$
+m_1 \ddot{x}_1 + (k_1 + k_2)x_1 - k_2 x_2 = 0
+$$
+
+$$
+m_2 \ddot{x}_2 + (k_2 + k_3)x_2 - k_2 x_1 = 0
+$$
+
+In matrix form,
+
+$$
+M \ddot{\mathbf{x}} + K \mathbf{x} = 0
+$$
+
+with
+
+$$
+M =
+\begin{pmatrix}
+m_1 & 0 \\
+0 & m_2
 \end{pmatrix}
 $$
 
-The natural frequencies are found by solving $\det(K - \omega^2 M) = 0$.
+and
+
+$$
+K =
+\begin{pmatrix}
+k_1 + k_2 & -k_2 \\
+-k_2 & k_2 + k_3
+\end{pmatrix}
+$$
+
+Seek normal-mode solutions of the form
+
+$$
+\mathbf{x}(t) = \mathbf{a} e^{i \omega t}
+$$
+
+Then
+
+$$
+(K - \omega^2 M)\mathbf{a} = 0
+$$
+
+For nontrivial amplitudes,
+
+$$
+\det(K - \omega^2 M) = 0
+$$
+
+This determinant yields the two natural frequencies. Each eigenvalue $\omega^2$ has a corresponding eigenvector $\mathbf{a}$, which gives the normal mode.
+
+## Final Result
+
+Equations of motion:
+
+$$
+m_1 \ddot{x}_1 + (k_1 + k_2)x_1 - k_2 x_2 = 0
+$$
+
+$$
+m_2 \ddot{x}_2 + (k_2 + k_3)x_2 - k_2 x_1 = 0
+$$
+
+Natural frequencies are obtained from
+
+$$
+\det(K - \omega^2 M) = 0
+$$
+
+Normal modes are given by the eigenvectors of $M^{-1}K$. The visualization file is `problem_set_04_vis_problem_08_coupled_springs.html`.
+
+## Interpretation
+
+The motion decomposes into collective patterns. In one mode the masses move approximately together, and in the other they move oppositely. For generic initial conditions the two modes mix, producing visible energy exchange between the masses.
 
 ---
 
-## Task 9 – Chain of $N$ springs (discrete wave model)
+# Task 09 – Chain of $N$ Springs (Discrete Wave Model)
 
-### Problem Statement
+## Problem Statement
 
-A system of $N$ masses connected by springs.
-1. Write the equations of motion.
-2. Observe pulse propagation and the effect of $k$ and $m$.
+A chain of $N$ masses connected by identical springs models a discrete medium supporting wave propagation.
 
-### Theory
+## Theory
 
-A discrete chain of masses and springs serves as a model for a solid lattice. In the limit where the number of masses $N \to \infty$ and the spacing $a \to 0$, the discrete equations of motion transition into the continuous wave equation.
+Let $x_n(t)$ be the displacement of the $n$-th mass. For an interior mass, the net force comes from its neighbors.
 
-### Step-by-Step Solution
+## Step-by-Step Solution
 
-**1. Equations of Motion**
-
-For the $i$-th mass $m$ in a chain where each mass is connected to its neighbors by springs of constant $k$, the force depends on the relative displacement of the neighbors $x_{i-1}$ and $x_{i+1}$:
+For interior sites,
 
 $$
-m \frac{d^2 x_i}{dt^2} = k(x_{i+1} - x_i) - k(x_i - x_{i-1})
+m \ddot{x}_n = k(x_{n+1} - x_n) - k(x_n - x_{n-1})
 $$
 
-Rearranging for acceleration:
+Therefore,
 
 $$
-\ddot{x}_i = \frac{k}{m} (x_{i+1} - 2x_i + x_{i-1})
+m \ddot{x}_n = k(x_{n+1} - 2x_n + x_{n-1})
 $$
 
-**2. Propagation Speed**
-
-The speed of a disturbance (wave) in this lattice is proportional to the coupling strength. Analytically, the longitudinal wave speed $v$ is given by:
+for
 
 $$
-v = a \sqrt{\frac{k}{m}}
+n = 2, 3, \dots, N-1
 $$
 
-where $a$ is the equilibrium separation between masses.
+The endpoint equations depend on the boundary conditions. For fixed ends one may take
 
-### Interpretation
+$$
+x_0 = 0,
+\qquad
+x_{N+1} = 0
+$$
 
-Increasing the spring constant $k$ (stiffening the "bonds") increases the propagation speed. Increasing the mass $m$ (increasing inertia) slows down the propagation.
+which gives
+
+$$
+m \ddot{x}_1 = k(x_2 - 2x_1)
+$$
+
+$$
+m \ddot{x}_N = k(x_{N-1} - 2x_N)
+$$
+
+A local initial disturbance can be imposed by displacing one mass or a small group of masses near the center. Numerical integration shows the propagation of the pulse through the chain.
+
+The characteristic speed scale increases with the spring stiffness and decreases with the mass. Dimensional reasoning gives
+
+$$
+v_{\mathrm{eff}} \propto \sqrt{\frac{k}{m}}
+$$
+
+## Final Result
+
+Discrete equations of motion:
+
+$$
+m \ddot{x}_n = k(x_{n+1} - 2x_n + x_{n-1})
+$$
+
+for interior masses, with boundary conditions added at the ends. The visualization file is `problem_set_04_vis_problem_09_chain_of_springs.html`.
+
+## Interpretation
+
+This system is the discrete analogue of a continuous elastic medium. A local disturbance spreads because each mass communicates motion to its neighbors through the springs.
 
 ---
 
-## Task 10 – Double pendulum and deterministic chaos
+# Task 10 – Double Pendulum and Deterministic Chaos
 
-### Problem Statement
+## Problem Statement
 
-Numerical analysis of a double pendulum system with 50 simultaneous copies to observe sensitivity to initial conditions.
+Perform a numerical analysis of a double pendulum and visualize sensitivity to initial conditions using an ensemble of 50 nearby trajectories.
 
-### Theory
+## Theory
 
-The double pendulum is a classic example of a simple Hamiltonian system that exhibits **deterministic chaos**. While the equations are deterministic, the motion becomes highly sensitive to initial conditions at high energy levels. This sensitivity is characterized by the **Lyapunov exponent**, which describes the rate at which two trajectories in phase space diverge.
+The double pendulum is a nonlinear coupled system. For sufficiently energetic motion, nearby initial conditions diverge noticeably in time, which is a signature of deterministic chaos.
 
-### Numerical Implementation (RK4)
+## Step-by-Step Solution
 
-To solve the system, the two second-order differential equations are broken into four first-order equations:
+### Coordinates for animation
+
+Let the pivot be at the origin. Then the first mass has coordinates
 
 $$
-\frac{d}{dt} \begin{pmatrix} \theta_1 \\ \theta_2 \\ \omega_1 \\ \omega_2 \end{pmatrix} = \mathbf{f}(\theta_1, \theta_2, \omega_1, \omega_2)
+x_1 = l_1 \sin \theta_1
 $$
 
-The Runge-Kutta 4th Order (RK4) method is used to ensure energy conservation and numerical stability over long integration times.
+$$
+y_1 = - l_1 \cos \theta_1
+$$
 
-### Interpretation of Chaos
+The second mass has coordinates
 
-In the "ensemble" simulation, 50 pendulums start with a difference in $\theta_2$ of only $10^{-4}$ rad. Initially, they appear as a single rod. However, as time progresses, the small differences are amplified exponentially. Eventually, the pendulums spread across the entire available phase space, demonstrating that long-term prediction of the state is impossible despite knowing the exact laws of motion.
+$$
+x_2 = x_1 + l_2 \sin \theta_2
+$$
+
+$$
+y_2 = y_1 - l_2 \cos \theta_2
+$$
+
+### Standard numerical model
+
+Introduce the variables
+
+$$
+\theta_1,
+\qquad
+\theta_2,
+\qquad
+\omega_1 = \dot{\theta}_1,
+\qquad
+\omega_2 = \dot{\theta}_2
+$$
+
+and integrate the standard double-pendulum equations numerically with RK4.
+
+For the standardized parameters,
+
+$$
+m_1 = m_2 = 1,
+\qquad
+l_1 = l_2 = 1,
+\qquad
+g = 9.81
+$$
+
+a safe step is
+
+$$
+\Delta t \le 0.01\ \mathrm{s}
+$$
+
+### Stability check
+
+The numerical solution should be checked by monitoring the total energy. If the time step is too large, the energy drift becomes clearly visible.
+
+### Sensitivity to initial conditions
+
+Use 50 systems with almost identical initial data, for example
+
+$$
+\theta_1(0) = \theta_{1,0},
+\qquad
+\theta_2(0) = \theta_{2,0} + \varepsilon_j
+$$
+
+where $\varepsilon_j$ spans a small interval such as
+
+$$
+10^{-4}\ \mathrm{rad} \le |\varepsilon_j| \le 10^{-2}\ \mathrm{rad}
+$$
+
+Initially, all trajectories remain close. After some time, they separate strongly even though the equations are deterministic.
+
+## Final Result
+
+Animation coordinates:
+
+$$
+x_1 = l_1 \sin \theta_1,
+\qquad
+y_1 = - l_1 \cos \theta_1
+$$
+
+$$
+x_2 = l_1 \sin \theta_1 + l_2 \sin \theta_2
+$$
+
+$$
+y_2 = - l_1 \cos \theta_1 - l_2 \cos \theta_2
+$$
+
+The system must be integrated numerically. The visualization file is `problem_set_04_vis_problem_10_double_pendulum_ensemble.html`.
+
+## Interpretation
+
+Chaos does not mean randomness of the equations. The evolution is fully deterministic, but extreme sensitivity to initial conditions makes long-term prediction effectively difficult. The 50-pendulum ensemble displays this divergence directly.

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Harmonic Motion</title>
+</head>
+<body>
+
+A: <input type="range" min="0.1" max="2" step="0.1" id="A" value="1">
+f: <input type="range" min="0.5" max="5" step="0.1" id="f" value="1">
+
+<canvas id="c" width="900" height="400"></canvas>
+
+<script>
+let ctx = document.getElementById("c").getContext("2d");
+
+let t = 0;
+
+function draw(){
+    let A = parseFloat(document.getElementById("A").value);
+    let f = parseFloat(document.getElementById("f").value);
+    let w = 2*Math.PI*f;
+
+    ctx.clearRect(0,0,900,400);
+
+    // draw curves
+    ctx.beginPath();
+    for(let x=0;x<900;x++){
+        let time = t + x*0.01;
+
+        let pos = A*Math.cos(w*time);
+        let vel = -A*w*Math.sin(w*time);
+        let acc = -A*w*w*Math.cos(w*time);
+
+        ctx.lineTo(x,100 + pos*50);
+    }
+    ctx.stroke();
+
+    ctx.beginPath();
+    for(let x=0;x<900;x++){
+        let time = t + x*0.01;
+        let vel = -A*w*Math.sin(w*time);
+        ctx.lineTo(x,200 + vel*20);
+    }
+    ctx.stroke();
+
+    ctx.beginPath();
+    for(let x=0;x<900;x++){
+        let time = t + x*0.01;
+        let acc = -A*w*w*Math.cos(w*time);
+        ctx.lineTo(x,300 + acc*5);
+    }
+    ctx.stroke();
+
+    // moving point
+    let pos = A*Math.cos(w*t);
+    ctx.beginPath();
+    ctx.arc(50,100 + pos*50,6,0,2*Math.PI);
+    ctx.fill();
+
+    t += 0.02;
+    requestAnimationFrame(draw);
+}
+
+draw();
+</script>
+
+</body>
+</html>
