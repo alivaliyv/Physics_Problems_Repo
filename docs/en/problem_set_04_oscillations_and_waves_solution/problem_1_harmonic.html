@@ -3,64 +3,161 @@
 <head>
 <meta charset="UTF-8">
 <title>Harmonic Motion</title>
+
+<style>
+body {
+    margin: 0;
+    background: #0f1117;
+    color: #e6edf3;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.controls {
+    margin: 15px;
+}
+
+label {
+    margin-right: 15px;
+}
+
+canvas {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+}
+</style>
 </head>
+
 <body>
 
-A: <input type="range" min="0.1" max="2" step="0.1" id="A" value="1">
-f: <input type="range" min="0.5" max="5" step="0.1" id="f" value="1">
+<div class="controls">
+    <label>A: <span id="A_val">1</span></label>
+    <input type="range" min="0.1" max="2" step="0.1" value="1" id="A">
 
-<canvas id="c" width="900" height="400"></canvas>
+    <label>f: <span id="f_val">1</span> Hz</label>
+    <input type="range" min="0.5" max="5" step="0.1" value="1" id="f">
+</div>
+
+<canvas id="c" width="1000" height="500"></canvas>
 
 <script>
-let ctx = document.getElementById("c").getContext("2d");
+const ctx = document.getElementById("c").getContext("2d");
 
 let t = 0;
 
+function drawGrid(yOffset){
+    ctx.strokeStyle = "#222";
+    for(let i=0;i<1000;i+=50){
+        ctx.beginPath();
+        ctx.moveTo(i,yOffset-60);
+        ctx.lineTo(i,yOffset+60);
+        ctx.stroke();
+    }
+    for(let j=-50;j<=50;j+=25){
+        ctx.beginPath();
+        ctx.moveTo(0,yOffset+j);
+        ctx.lineTo(1000,yOffset+j);
+        ctx.stroke();
+    }
+}
+
+function drawAxes(yOffset,label){
+    ctx.strokeStyle = "#555";
+    ctx.beginPath();
+    ctx.moveTo(0,yOffset);
+    ctx.lineTo(1000,yOffset);
+    ctx.stroke();
+
+    ctx.fillStyle = "#aaa";
+    ctx.fillText(label,10,yOffset-10);
+}
+
 function draw(){
-    let A = parseFloat(document.getElementById("A").value);
-    let f = parseFloat(document.getElementById("f").value);
+
+    let A = parseFloat(A_slider.value);
+    let f = parseFloat(f_slider.value);
     let w = 2*Math.PI*f;
 
-    ctx.clearRect(0,0,900,400);
+    A_val.innerText = A.toFixed(2);
+    f_val.innerText = f.toFixed(2);
 
-    // draw curves
+    ctx.clearRect(0,0,1000,500);
+
+    let offsets = [100, 250, 400];
+
+    // POSITION
+    drawGrid(offsets[0]);
+    drawAxes(offsets[0], "x(t)");
+
+    ctx.strokeStyle = "#4cc9f0";
     ctx.beginPath();
-    for(let x=0;x<900;x++){
+    for(let x=0;x<1000;x++){
         let time = t + x*0.01;
-
-        let pos = A*Math.cos(w*time);
-        let vel = -A*w*Math.sin(w*time);
-        let acc = -A*w*w*Math.cos(w*time);
-
-        ctx.lineTo(x,100 + pos*50);
+        let y = A*Math.cos(w*time);
+        ctx.lineTo(x, offsets[0] + y*60);
     }
     ctx.stroke();
 
+    // VELOCITY
+    drawGrid(offsets[1]);
+    drawAxes(offsets[1], "v(t)");
+
+    ctx.strokeStyle = "#f72585";
     ctx.beginPath();
-    for(let x=0;x<900;x++){
+    for(let x=0;x<1000;x++){
         let time = t + x*0.01;
-        let vel = -A*w*Math.sin(w*time);
-        ctx.lineTo(x,200 + vel*20);
+        let y = -A*w*Math.sin(w*time);
+        ctx.lineTo(x, offsets[1] + y*20);
     }
     ctx.stroke();
 
+    // ACCELERATION
+    drawGrid(offsets[2]);
+    drawAxes(offsets[2], "a(t)");
+
+    ctx.strokeStyle = "#b8f728";
     ctx.beginPath();
-    for(let x=0;x<900;x++){
+    for(let x=0;x<1000;x++){
         let time = t + x*0.01;
-        let acc = -A*w*w*Math.cos(w*time);
-        ctx.lineTo(x,300 + acc*5);
+        let y = -A*w*w*Math.cos(w*time);
+        ctx.lineTo(x, offsets[2] + y*5);
     }
     ctx.stroke();
 
-    // moving point
+    // moving particle
     let pos = A*Math.cos(w*t);
+    ctx.fillStyle = "#ffffff";
     ctx.beginPath();
-    ctx.arc(50,100 + pos*50,6,0,2*Math.PI);
+    ctx.arc(50, offsets[0] + pos*60, 6, 0, 2*Math.PI);
+    ctx.fill();
+
+    // PHASE SPACE
+    let px = 800 + pos*80;
+    let pv = 250 - (-A*w*Math.sin(w*t))*20;
+
+    ctx.fillStyle = "#ffaa00";
+    ctx.fillRect(750,150,200,200);
+
+    ctx.strokeStyle = "#000";
+    ctx.strokeRect(750,150,200,200);
+
+    ctx.fillStyle = "#000";
+    ctx.fillText("Phase Space (x,v)",760,170);
+
+    ctx.fillStyle = "#ffcc00";
+    ctx.beginPath();
+    ctx.arc(px,pv,4,0,2*Math.PI);
     ctx.fill();
 
     t += 0.02;
     requestAnimationFrame(draw);
 }
+
+let A_slider = document.getElementById("A");
+let f_slider = document.getElementById("f");
 
 draw();
 </script>
