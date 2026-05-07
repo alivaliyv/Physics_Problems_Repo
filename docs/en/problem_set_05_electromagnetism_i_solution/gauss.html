@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gauss's Law Visualization</title>
+    <style>
+        body { margin: 0; background: #050505; color: white; font-family: sans-serif; overflow: hidden; }
+        canvas { display: block; }
+        .controls {
+            position: absolute; top: 20px; left: 20px;
+            background: rgba(0, 0, 0, 0.7); padding: 15px;
+            border-radius: 8px; border: 1px solid #444;
+        }
+        h2 { margin: 0 0 10px 0; font-size: 18px; color: #4af; }
+        .stat { font-family: monospace; color: #0f0; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="controls">
+    <h2>Gauss's Law (Flux Verification)</h2>
+    <label>Charge (q): </label>
+    <input type="range" id="chargeRange" min="-10" max="10" value="5">
+    <br>
+    <label>Surface Radius: </label>
+    <input type="range" id="radiusRange" min="50" max="200" value="120">
+    <div class="stat" id="fluxInfo">Flux Φ ≈ q / ε₀</div>
+</div>
+
+<canvas id="fieldCanvas"></canvas>
+
+<script>
+const canvas = document.getElementById('fieldCanvas');
+const ctx = canvas.getContext('2d');
+const chargeInput = document.getElementById('chargeRange');
+const radiusInput = document.getElementById('radiusRange');
+const fluxInfo = document.getElementById('fluxInfo');
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let particles = [];
+const numParticles = 200;
+
+class FieldLine {
+    constructor(angle) {
+        this.angle = angle;
+        this.reset();
+    }
+    reset() {
+        this.dist = 10;
+    }
+    update(q) {
+        this.dist += Math.abs(q) * 0.5 + 1;
+        if (this.dist > 600) this.reset();
+    }
+    draw(q) {
+        const x = canvas.width / 2 + Math.cos(this.angle) * this.dist;
+        const y = canvas.height / 2 + Math.sin(this.angle) * this.dist;
+        
+        ctx.beginPath();
+        ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+        ctx.fillStyle = q > 0 ? '#ff4d4d' : '#4d94ff';
+        ctx.fill();
+    }
+}
+
+// Initialize "flux" particles
+for (let i = 0; i < numParticles; i++) {
+    particles.push(new FieldLine((i / numParticles) * Math.PI * 2));
+}
+
+function animate() {
+    ctx.fillStyle = 'rgba(5, 5, 5, 0.2)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const q = parseFloat(chargeInput.value);
+    const R = parseFloat(radiusInput.value);
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+
+    // Draw Gaussian Surface (Sphere cross-section)
+    ctx.setLineDash([5, 5]);
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, R, 0, Math.PI * 2);
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Draw Point Charge
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, 10, 0, Math.PI * 2);
+    ctx.fillStyle = q >= 0 ? '#ff0000' : '#0000ff';
+    ctx.fill();
+    ctx.fillStyle = 'white';
+    ctx.textAlign = 'center';
+    ctx.fillText(q > 0 ? "+" : "-", centerX, centerY + 4);
+
+    // Animate field lines (flux)
+    particles.forEach(p => {
+        p.update(q);
+        p.draw(q);
+        
+        // Highlight flux intersection
+        if (Math.abs(p.dist - R) < 5) {
+            ctx.beginPath();
+            ctx.arc(centerX + Math.cos(p.angle)*R, centerY + Math.sin(p.angle)*R, 3, 0, Math.PI*2);
+            ctx.fillStyle = 'yellow';
+            ctx.fill();
+        }
+    });
+
+    fluxInfo.innerText = `Enclosed Charge: ${q} μC\nFlux: ${q > 0 ? 'Outward' : q < 0 ? 'Inward' : 'Zero'}`;
+
+    requestAnimationFrame(animate);
+}
+
+window.onresize = () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+};
+
+animate();
+</script>
+</body>
+</html>
