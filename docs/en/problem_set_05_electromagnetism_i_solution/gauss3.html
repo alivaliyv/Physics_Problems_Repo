@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Gauss Law Interactive Animation</title>
+
+<style>
+    *{
+        margin:0;
+        padding:0;
+        box-sizing:border-box;
+        font-family:Arial, sans-serif;
+    }
+
+    body{
+        background:#0a0f1f;
+        color:white;
+        overflow:hidden;
+    }
+
+    #ui{
+        position:absolute;
+        top:10px;
+        left:10px;
+        width:320px;
+        background:rgba(0,0,0,0.7);
+        padding:20px;
+        border-radius:15px;
+        z-index:10;
+        backdrop-filter: blur(10px);
+    }
+
+    h1{
+        font-size:24px;
+        margin-bottom:10px;
+        color:#4fc3f7;
+    }
+
+    .control{
+        margin:15px 0;
+    }
+
+    label{
+        display:block;
+        margin-bottom:5px;
+        font-size:14px;
+    }
+
+    input[type=range]{
+        width:100%;
+    }
+
+    .value{
+        color:#4fc3f7;
+        font-weight:bold;
+    }
+
+    #info{
+        margin-top:15px;
+        line-height:1.5;
+        font-size:14px;
+    }
+
+    canvas{
+        display:block;
+    }
+
+    .formula{
+        margin-top:15px;
+        padding:10px;
+        background:rgba(255,255,255,0.08);
+        border-radius:10px;
+        font-size:15px;
+    }
+
+    button{
+        width:100%;
+        margin-top:10px;
+        padding:10px;
+        border:none;
+        border-radius:10px;
+        background:#4fc3f7;
+        color:black;
+        font-weight:bold;
+        cursor:pointer;
+        transition:0.3s;
+    }
+
+    button:hover{
+        background:#81d4fa;
+    }
+
+</style>
+</head>
+<body>
+
+<div id="ui">
+
+    <h1>Gauss Law Explorer</h1>
+
+    <div class="control">
+        <label>Charge q (μC): <span class="value" id="chargeVal">5</span></label>
+        <input type="range" id="charge" min="-10" max="10" step="1" value="5">
+    </div>
+
+    <div class="control">
+        <label>Gaussian Radius: <span class="value" id="radiusVal">150</span></label>
+        <input type="range" id="radius" min="60" max="280" step="1" value="150">
+    </div>
+
+    <div class="control">
+        <label>Field Lines: <span class="value" id="linesVal">20</span></label>
+        <input type="range" id="lines" min="4" max="60" step="1" value="20">
+    </div>
+
+    <button onclick="toggleField()">Toggle Field Animation</button>
+
+    <div class="formula">
+        <b>Gauss Law:</b><br><br>
+        Φ = ∮ E · dA = q / ε₀
+    </div>
+
+    <div id="info">
+        <b>Explanation:</b><br><br>
+
+        Electric flux depends ONLY on the charge enclosed inside the Gaussian surface.<br><br>
+
+        Increasing charge → stronger electric field.<br><br>
+
+        Changing sphere radius does NOT change total flux.
+    </div>
+
+</div>
+
+<canvas id="canvas"></canvas>
+
+<script>
+
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+resize();
+
+window.addEventListener("resize", resize);
+
+function resize(){
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+
+const chargeSlider = document.getElementById("charge");
+const radiusSlider = document.getElementById("radius");
+const linesSlider = document.getElementById("lines");
+
+const chargeVal = document.getElementById("chargeVal");
+const radiusVal = document.getElementById("radiusVal");
+const linesVal = document.getElementById("linesVal");
+
+let animateField = true;
+
+function toggleField(){
+    animateField = !animateField;
+}
+
+let particles = [];
+
+function createParticles(lines){
+    particles = [];
+
+    for(let i=0;i<lines;i++){
+        particles.push({
+            angle:(Math.PI*2/lines)*i,
+            offset:Math.random()*100
+        });
+    }
+}
+
+createParticles(parseInt(linesSlider.value));
+
+linesSlider.addEventListener("input",()=>{
+    createParticles(parseInt(linesSlider.value));
+});
+
+function draw(){
+
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    const cx = canvas.width/2;
+    const cy = canvas.height/2;
+
+    const q = parseFloat(chargeSlider.value);
+    const radius = parseFloat(radiusSlider.value);
+    const lines = parseInt(linesSlider.value);
+
+    chargeVal.innerText = q;
+    radiusVal.innerText = radius;
+    linesVal.innerText = lines;
+
+    // Background glow
+    let glow = Math.abs(q)*10;
+
+    ctx.beginPath();
+    ctx.arc(cx,cy,25+glow*0.2,0,Math.PI*2);
+
+    let gradient = ctx.createRadialGradient(cx,cy,5,cx,cy,80);
+
+    if(q>=0){
+        gradient.addColorStop(0,"rgba(255,80,80,1)");
+        gradient.addColorStop(1,"rgba(255,80,80,0)");
+    }else{
+        gradient.addColorStop(0,"rgba(80,120,255,1)");
+        gradient.addColorStop(1,"rgba(80,120,255,0)");
+    }
+
+    ctx.fillStyle = gradient;
+    ctx.fill();
+
+    // Charge
+    ctx.beginPath();
+    ctx.arc(cx,cy,25,0,Math.PI*2);
+
+    ctx.fillStyle = q>=0 ? "#ff5252" : "#448aff";
+    ctx.fill();
+
+    // Sign
+    ctx.fillStyle = "white";
+    ctx.font = "28px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    ctx.fillText(q>=0 ? "+" : "-",cx,cy);
+
+    // Gaussian Surface
+    ctx.beginPath();
+    ctx.arc(cx,cy,radius,0,Math.PI*2);
+
+    ctx.strokeStyle = "rgba(79,195,247,0.9)";
+    ctx.lineWidth = 3;
+    ctx.setLineDash([10,10]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Field lines
+    particles.forEach((p,i)=>{
+
+        let angle = p.angle;
+
+        let dir = q>=0 ? 1 : -1;
+
+        let maxLen = radius + 250;
+
+        let progress = animateField
+            ? ((Date.now()*0.001 + p.offset)%1)
+            : 0.5;
+
+        for(let r=40;r<maxLen;r+=20){
+
+            let x = cx + Math.cos(angle)*r*dir;
+            let y = cy + Math.sin(angle)*r*dir;
+
+            ctx.beginPath();
+            ctx.arc(x,y,2.2,0,Math.PI*2);
+
+            let alpha = 1-r/maxLen;
+
+            ctx.fillStyle = q>=0
+                ? `rgba(255,200,120,${alpha})`
+                : `rgba(120,200,255,${alpha})`;
+
+            ctx.fill();
+        }
+
+        // Moving particles
+        let movingR = 40 + progress*maxLen;
+
+        let px = cx + Math.cos(angle)*movingR*dir;
+        let py = cy + Math.sin(angle)*movingR*dir;
+
+        ctx.beginPath();
+        ctx.arc(px,py,5,0,Math.PI*2);
+
+        ctx.fillStyle = "#ffffff";
+        ctx.fill();
+
+        // Arrow
+        let ax = px + Math.cos(angle)*15*dir;
+        let ay = py + Math.sin(angle)*15*dir;
+
+        ctx.beginPath();
+        ctx.moveTo(px,py);
+        ctx.lineTo(ax,ay);
+
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+    });
+
+    // Flux visualization
+    let epsilon0 = 8.854e-12;
+
+    let flux = (q*1e-6/epsilon0);
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "22px Arial";
+
+    ctx.fillText(
+        "Electric Flux Φ = " + flux.toExponential(2),
+        cx,
+        60
+    );
+
+    ctx.font = "18px Arial";
+
+    ctx.fillText(
+        "Flux is independent of surface size!",
+        cx,
+        95
+    );
+
+    requestAnimationFrame(draw);
+}
+
+draw();
+
+</script>
+
+</body>
+</html>
