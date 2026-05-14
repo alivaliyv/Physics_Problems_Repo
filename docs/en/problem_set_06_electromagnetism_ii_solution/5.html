@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Motional EMF Simulation</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --panel-bg: #1e293b;
+            --text: #f8fafc;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --rail: #94a3b8;
+            --rod: #f59e0b;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            background: var(--panel-bg);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #334155;
+            padding-bottom: 15px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .main-content {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .canvas-container {
+            flex: 1;
+            min-width: 500px;
+            position: relative;
+            background: #0b1120;
+            border-radius: 12px;
+            border: 1px solid #334155;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        .control-panel {
+            flex: 0 0 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            background: #0f172a;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #334155;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input[type=range] {
+            width: 100%;
+            cursor: pointer;
+            accent-color: var(--accent);
+        }
+
+        .result-display {
+            margin-top: auto;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid #22c55e;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .result-display .value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #4ade80;
+            font-family: monospace;
+            margin-top: 5px;
+        }
+
+        .formula {
+            font-family: monospace;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--accent);
+            color: white;
+            text-transform: uppercase;
+            font-size: 12px;
+        }
+
+        button:hover {
+            background: var(--accent-hover);
+        }
+
+        button#resetBtn {
+            background: #475569;
+        }
+
+        button#resetBtn:hover {
+            background: #334155;
+        }
+        
+        .live-status {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            color: #ef4444;
+            font-weight: bold;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: monospace;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            background: #ef4444;
+            border-radius: 50%;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>Motional EMF Simulator</h1>
+        </div>
+
+        <div class="main-content">
+            <div class="canvas-container">
+                <div class="live-status" id="statusIndicator" style="display: none;">
+                    <div class="dot"></div> LIVE
+                </div>
+                <canvas id="simCanvas" width="600" height="350"></canvas>
+            </div>
+
+            <div class="control-panel">
+                <div class="buttons">
+                    <button id="playBtn">Play / Pause</button>
+                    <button id="resetBtn">Reset</button>
+                </div>
+
+                <div class="control-group">
+                    <div class="control-header">
+                        <span>Velocity (v)</span>
+                        <span id="vVal">4.0 m/s</span>
+                    </div>
+                    <input type="range" id="vSlider" min="0" max="10" step="0.5" value="4">
+                </div>
+
+                <div class="control-group">
+                    <div class="control-header">
+                        <span>Magnetic Field (B)</span>
+                        <span id="bVal">0.6 T</span>
+                    </div>
+                    <input type="range" id="bSlider" min="0" max="2" step="0.1" value="0.6">
+                </div>
+
+                <div class="control-group">
+                    <div class="control-header">
+                        <span>Rod Length (L)</span>
+                        <span id="lVal">0.25 m</span>
+                    </div>
+                    <input type="range" id="lSlider" min="0.1" max="0.5" step="0.05" value="0.25">
+                </div>
+
+                <div class="result-display">
+                    <div>Induced EMF (&#8490;)</div>
+                    <div class="formula">&#8490; = B &times; L &times; v</div>
+                    <div class="value" id="emfDisplay">0.60 V</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // UI Elements
+        const vSlider = document.getElementById('vSlider');
+        const bSlider = document.getElementById('bSlider');
+        const lSlider = document.getElementById('lSlider');
+        const vVal = document.getElementById('vVal');
+        const bVal = document.getElementById('bVal');
+        const lVal = document.getElementById('lVal');
+        const emfDisplay = document.getElementById('emfDisplay');
+        const playBtn = document.getElementById('playBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const statusIndicator = document.getElementById('statusIndicator');
+
+        // State Variables
+        let isPlaying = false;
+        let animationId;
+        let rodX = 50;
+        const baseY = canvas.height / 2;
+        
+        // Update values and calculate EMF
+        function updateValues() {
+            const v = parseFloat(vSlider.value);
+            const b = parseFloat(bSlider.value);
+            const l = parseFloat(lSlider.value);
+            
+            vVal.textContent = v.toFixed(1) + " m/s";
+            bVal.textContent = b.toFixed(1) + " T";
+            lVal.textContent = l.toFixed(2) + " m";
+            
+            const emf = (b * l * v).toFixed(2);
+            emfDisplay.textContent = emf + " V";
+            
+            if(!isPlaying) draw(); // Redraw static state if paused
+        }
+
+        // Draw the scene
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const v = parseFloat(vSlider.value);
+            const b = parseFloat(bSlider.value);
+            const l = parseFloat(lSlider.value);
+            
+            // Visual mapping
+            const visualLength = l * 400; // Scale length for canvas
+            const railTop = baseY - visualLength / 2;
+            const railBottom = baseY + visualLength / 2;
+
+            // Draw Magnetic Field (X marks)
+            ctx.fillStyle = `rgba(148, 163, 184, ${b/2 + 0.1})`; // Opacity based on B strength
+            ctx.font = "16px monospace";
+            ctx.textAlign = "center";
+            for(let x = 30; x < canvas.width; x += 40) {
+                for(let y = 30; y < canvas.height; y += 40) {
+                    ctx.fillText("×", x, y);
+                }
+            }
+
+            // Draw Rails
+            ctx.strokeStyle = "#94a3b8";
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(20, railTop);
+            ctx.lineTo(canvas.width - 20, railTop);
+            ctx.moveTo(20, railBottom);
+            ctx.lineTo(canvas.width - 20, railBottom);
+            ctx.stroke();
+
+            // Draw Wire connecting rails (to show closed circuit conceptually)
+            ctx.strokeStyle = "#475569";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(20, railTop);
+            ctx.lineTo(20, railBottom);
+            ctx.stroke();
+
+            // Draw Moving Rod
+            ctx.fillStyle = "#f59e0b";
+            ctx.shadowColor = "#f59e0b";
+            ctx.shadowBlur = isPlaying && v > 0 ? 10 : 0;
+            ctx.fillRect(rodX, railTop - 10, 12, visualLength + 20);
+            ctx.shadowBlur = 0;
+
+            // Draw Velocity Vector Arrow
+            if (v > 0) {
+                const arrowLength = v * 10;
+                const arrowY = baseY;
+                ctx.strokeStyle = "#ef4444";
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(rodX + 12, arrowY);
+                ctx.lineTo(rodX + 12 + arrowLength, arrowY);
+                
+                // Arrowhead
+                ctx.moveTo(rodX + 12 + arrowLength - 8, arrowY - 5);
+                ctx.lineTo(rodX + 12 + arrowLength, arrowY);
+                ctx.lineTo(rodX + 12 + arrowLength - 8, arrowY + 5);
+                ctx.stroke();
+
+                // Vector Label
+                ctx.fillStyle = "#ef4444";
+                ctx.font = "bold 14px sans-serif";
+                ctx.fillText("v", rodX + 20 + arrowLength, arrowY + 4);
+            }
+        }
+
+        // Animation Loop
+        function animate() {
+            if (!isPlaying) return;
+            
+            const v = parseFloat(vSlider.value);
+            rodX += v * 0.5; // Scale visual speed
+            
+            if (rodX > canvas.width - 40) {
+                rodX = 20; // Reset position to left
+            }
+            
+            draw();
+            animationId = requestAnimationFrame(animate);
+        }
+
+        // Event Listeners
+        [vSlider, bSlider, lSlider].forEach(slider => {
+            slider.addEventListener('input', updateValues);
+        });
+
+        playBtn.addEventListener('click', () => {
+            isPlaying = !isPlaying;
+            statusIndicator.style.display = isPlaying ? "flex" : "none";
+            if (isPlaying) {
+                animate();
+            } else {
+                cancelAnimationFrame(animationId);
+                draw();
+            }
+        });
+
+        resetBtn.addEventListener('click', () => {
+            vSlider.value = 4;
+            bSlider.value = 0.6;
+            lSlider.value = 0.25;
+            rodX = 50;
+            updateValues();
+            if(!isPlaying) draw();
+        });
+
+        // Initialize
+        updateValues();
+        draw();
+    </script>
+</body>
+</html>
